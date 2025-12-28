@@ -1,0 +1,5 @@
+{
+  "name": "Dynamic Report Builder",
+  "description": "A powerful React-based dashboard and report builder that allows users to create, edit, and preview structured reports with KPIs, charts, tables, and more based on a flexible JSON schema.",
+  "requestFramePermissions": []
+}
