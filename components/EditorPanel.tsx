@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Section, SectionType, Report, DataChartSection, TableSection, KPISection, SectionStyles, KPIMetric } from '../types';
+import { Section, SectionType, Report, DataChartSection, TableSection, KPISection, SectionStyles, KPIMetric, PastedGraphicSection } from '../types';
 
 interface EditorPanelProps {
   report: Report;
@@ -101,6 +101,22 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
     const newId = `sec-${Date.now()}`;
     onUpdate({ ...report, sections: [...report.sections, { ...JSON.parse(JSON.stringify(clipboard)), id: newId }] });
     onSelect(newId);
+  };
+
+  const handleImagePaste = (e: React.ClipboardEvent) => {
+    const items = e.clipboardData.items;
+    for (const item of items) {
+      if (item.type.indexOf('image') !== -1) {
+        const blob = item.getAsFile();
+        if (!blob) continue;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const base64 = event.target?.result as string;
+          if (selectedId) updateSection(selectedId, { src: base64 } as any);
+        };
+        reader.readAsDataURL(blob);
+      }
+    }
   };
 
   const handleDataPaste = (text: string, sectionId: string) => {
@@ -326,6 +342,54 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
                         >
                             + הוסף מדד KPI חדש
                         </button>
+                    </div>
+                </div>
+              )}
+
+              {selectedSection.type === 'pasted_graphic' && (
+                <div className="space-y-6">
+                    <label className="text-xl font-extrabold text-[#002d72] block px-2 italic">העלאת תמונה / גרפיקה</label>
+                    <div 
+                        className="w-full h-72 border-4 border-dashed border-slate-200 rounded-[2.5rem] flex flex-col items-center justify-center text-slate-400 hover:border-[#002d72] hover:text-[#002d72] transition-all cursor-pointer relative overflow-hidden bg-slate-50 group"
+                        onPaste={handleImagePaste}
+                        onClick={() => {
+                            const input = document.createElement('input');
+                            input.type = 'file';
+                            input.accept = 'image/*';
+                            input.onchange = (e) => {
+                                const file = (e.target as HTMLInputElement).files?.[0];
+                                if (file) {
+                                    const reader = new FileReader();
+                                    reader.onload = (ev) => {
+                                        updateSection(selectedId!, { src: ev.target?.result as string } as any);
+                                    };
+                                    reader.readAsDataURL(file);
+                                }
+                            };
+                            input.click();
+                        }}
+                    >
+                        {(selectedSection as PastedGraphicSection).src ? (
+                            <img src={(selectedSection as PastedGraphicSection).src} className="absolute inset-0 w-full h-full object-contain p-4" alt="תצוגה מקדימה" />
+                        ) : (
+                            <div className="text-center p-6">
+                                <span className="text-6xl mb-4 block">🖼️</span>
+                                <p className="font-bold text-xl">לחץ לבחירת קובץ או הדבק (Paste) תמונה כאן</p>
+                            </div>
+                        )}
+                        <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                           <span className="bg-white/90 text-[#002d72] px-6 py-2 rounded-full font-bold shadow-xl">החלף תמונה</span>
+                        </div>
+                    </div>
+                    <div className="space-y-4">
+                        <label className="text-sm font-bold text-slate-400 block px-2">כיתוב לתמונה (Caption)</label>
+                        <input 
+                            type="text" 
+                            value={(selectedSection as PastedGraphicSection).caption || ''} 
+                            onChange={e => updateSection(selectedId!, { caption: e.target.value } as any)} 
+                            placeholder="הוסף כיתוב למטה..." 
+                            className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold focus:bg-white outline-none focus:border-[#002d72]"
+                        />
                     </div>
                 </div>
               )}
