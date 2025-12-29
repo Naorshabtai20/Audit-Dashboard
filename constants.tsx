@@ -8,7 +8,18 @@ export const INITIAL_REPORT: Report = {
             type: "text",
             title: "דו\"ח ביצועים שנתי - 2024",
             content: "ברוכים הבאים למערכת הפקת הדו\"חות החדשה. כאן תוכלו לעצב מסמכים מקצועיים בלחיצת כפתור ולגרור אותם כדי לסדר את המבנה.",
-            styles: { colSpan: 12, fontScale: 1.2, alignment: 'right', color: '#1e293b', fontWeight: '800' }
+            styles: { colSpan: 12, fontScale: 1.2, alignment: 'right', color: '#002d72', fontWeight: '800' }
+        },
+        {
+            id: "sec-kpi-1",
+            type: "kpi",
+            title: "מדדי צמיחה מרכזיים",
+            metrics: [
+                { label: "הכנסות שנתיות", value: "4.5M", delta: "+12%", trend: "up" },
+                { label: "לקוחות פעילים", value: "1,240", delta: "+8%", trend: "up" },
+                { label: "שימור לקוחות", value: "94%", delta: "-1%", trend: "down" }
+            ],
+            styles: { colSpan: 12, fontScale: 1, dataFontScale: 1 }
         },
         {
             id: "sec-2",

@@ -4,8 +4,9 @@ export type SectionType = "text" | "pasted_graphic" | "data_chart" | "table" | "
 export interface SectionStyles {
     colSpan?: number; // 1-12 columns in grid
     height?: number; // explicit height in pixels
-    fontScale?: number; // 0.5-2.5 (Headers/General)
-    dataFontScale?: number; // 0.5-3.0 (KPI Values / Table Cells)
+    fontScale?: number; // 0.5-6.0 (Headers/Titles)
+    dataFontScale?: number; // 0.5-5.0 (KPI Values / Table Cells)
+    labelFontScale?: number; // 0.5-3.0 (KPI Labels / Small text)
     alignment?: 'right' | 'center' | 'left';
     color?: string;
     backgroundColor?: string;

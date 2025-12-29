@@ -40,7 +40,7 @@ const Card: React.FC<{
     )}
     
     {isSelected && (
-      <div className="absolute top-4 left-4 bg-[#002d72] text-white text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-lg z-50">
+      <div className="absolute top-4 left-4 bg-[#002d72] text-white text-[8px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full shadow-lg z-50">
         עריכה פעילה
       </div>
     )}
@@ -60,13 +60,19 @@ export const SectionPreview: React.FC<{
   const styles = section.styles || {};
   const fontScale = styles.fontScale || 1;
   const dataFontScale = styles.dataFontScale || 1;
+  const labelFontScale = styles.labelFontScale || 1;
   const textColor = styles.color || '#002d72';
 
   const renderKPI = (sec: KPISection) => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-4 flex-1 items-center">
       {sec.metrics.map((m, i) => (
         <div key={i} className="bg-slate-50 p-8 rounded-[2rem] text-right shadow-sm border border-slate-100 flex flex-col justify-center">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{m.label}</p>
+          <p 
+            className="font-extrabold text-slate-400 uppercase tracking-widest mb-2"
+            style={{ fontSize: `${10 * labelFontScale}px` }}
+          >
+            {m.label}
+          </p>
           <div className="flex items-baseline justify-between gap-4">
             <span 
                 className="font-extrabold leading-tight tracking-tighter"
@@ -93,7 +99,15 @@ export const SectionPreview: React.FC<{
         <table className="w-full text-right border-collapse">
           <thead>
             <tr className="bg-[#002d72] text-white">
-              {sec.headers.map((h, i) => <th key={i} className="p-4 text-[10px] font-black uppercase tracking-wider">{h}</th>)}
+              {sec.headers.map((h, i) => (
+                <th 
+                  key={i} 
+                  className="p-4 font-extrabold uppercase tracking-wider"
+                  style={{ fontSize: `${10 * labelFontScale}px` }}
+                >
+                  {h}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
@@ -163,7 +177,7 @@ export const SectionPreview: React.FC<{
               {sec.chartKind === 'bar' ? (
                 <BarChart data={data} margin={{ top: 20, right: 20, left: 10, bottom: 20 }}>
                   {showGrid && <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />}
-                  <XAxis dataKey={xKey} axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 800, fill: '#64748b'}} dy={10} />
+                  <XAxis dataKey={xKey} axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 700, fill: '#64748b'}} dy={10} />
                   <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#94a3b8'}} />
                   <Tooltip contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)'}} />
                   {showLegend && <Legend verticalAlign="top" align="right" iconType="circle" wrapperStyle={{paddingBottom: '20px', fontSize: '10px', fontWeight: 'bold'}}/>}
@@ -174,7 +188,7 @@ export const SectionPreview: React.FC<{
               ) : (
                 <LineChart data={data} margin={{ top: 20, right: 20, left: 10, bottom: 20 }}>
                   {showGrid && <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />}
-                  <XAxis dataKey={xKey} axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 800, fill: '#64748b'}} dy={10} />
+                  <XAxis dataKey={xKey} axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 700, fill: '#64748b'}} dy={10} />
                   <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#94a3b8'}} />
                   <Tooltip contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)'}} />
                   {showLegend && <Legend verticalAlign="top" align="right" iconType="circle" wrapperStyle={{paddingBottom: '20px', fontSize: '10px', fontWeight: 'bold'}}/>}
