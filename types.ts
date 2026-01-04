@@ -1,5 +1,5 @@
 
-export type SectionType = "text" | "pasted_graphic" | "data_chart" | "table" | "kpi";
+export type SectionType = "text" | "pasted_graphic" | "data_chart" | "table" | "kpi" | "summary_evaluation";
 
 export interface SectionStyles {
     colSpan?: number; // 1-12 columns in grid
@@ -60,7 +60,16 @@ export interface KPISection extends SectionBase {
     metrics: KPIMetric[];
 }
 
-export type Section = TextSection | PastedGraphicSection | DataChartSection | TableSection | KPISection;
+export interface SummaryEvaluationSection extends SectionBase {
+    type: "summary_evaluation";
+    briefingText: string;
+    score: number; // 1 to 5
+    scoreLabel: string;
+    recommendations: string[];
+    deficiencies: string[];
+}
+
+export type Section = TextSection | PastedGraphicSection | DataChartSection | TableSection | KPISection | SummaryEvaluationSection;
 
 export type Report = {
     sections: Section[];

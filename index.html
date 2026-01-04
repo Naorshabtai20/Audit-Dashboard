@@ -4,42 +4,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>בונה דוחות דינמי | Pro Edition</title>
+    <title>מערכת דוחות מקומית | Pro Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
+        /* System Font Stack optimized for Hebrew and Offline usage */
         body {
-            font-family: 'Assistant', sans-serif;
-            background-color: #f4f7fa;
-            color: #002d72;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif, 'Arial', 'Assistant';
+            background-color: #f0f2f5;
+            color: #1a202c;
+            margin: 0;
+            padding: 0;
+            user-select: none; /* Desktop app feel */
         }
         
         input, button, textarea, select {
-            font-family: 'Assistant', sans-serif !important;
+            font-family: inherit !important;
         }
 
+        /* Scrollbar customization - no external assets needed */
         ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+            width: 8px;
+            height: 8px;
         }
         ::-webkit-scrollbar-track {
-            background: #f1f5f9;
+            background: #e2e8f0;
         }
         ::-webkit-scrollbar-thumb {
             background: #cbd5e1;
-            border-radius: 10px;
+            border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #002d72;
+            background: #94a3b8;
         }
-        .custom-scrollbar {
-            scrollbar-width: thin;
-            scrollbar-color: #cbd5e1 #f1f5f9;
+
+        .no-select {
+            user-select: none;
         }
-        .transition-all {
-            transition-duration: 400ms !important;
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background: white;
+            }
         }
     </style>
 <script type="importmap">

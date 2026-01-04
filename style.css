@@ -1,0 +1,49 @@
+
+/* הוספה של הגדרות עבור סרגל הניווט */
+nav button:hover {
+    transform: translateX(-4px);
+}
+
+nav .active {
+    background-color: #3b82f6;
+    color: white;
+}
+
+/* שדרוג ה-Rounded corners למראה מודרני יותר */
+.rounded-2-5rem {
+    border-radius: 2.5rem;
+}
+
+.shadow-2xl {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* שיפור תצוגת הכפתורים בסרגל */
+nav span {
+    transition: opacity 0.3s ease;
+}
+
+nav button:hover span {
+    opacity: 1;
+}
+
+/* שאר הסטייל הקיים */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background-color: #f4f7fa; direction: rtl; }
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.flex-1 { flex: 1 1 0%; }
+.shrink-0 { flex-shrink: 0; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.p-8 { padding: 2rem; }
+.bg-white { background-color: white; }
+.border-l { border-left: 1px solid #e2e8f0; }
+.border-b { border-bottom: 1px solid #e2e8f0; }
+.no-print { display: flex; }
+@media print { .no-print { display: none !important; } }
+.custom-scrollbar::-webkit-scrollbar { width: 6px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+.grid { display: grid; }
+.grid-cols-12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+.gap-8 { gap: 2rem; }

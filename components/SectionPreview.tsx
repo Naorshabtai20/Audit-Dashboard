@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Section, TextSection, DataChartSection, TableSection, KPISection, PastedGraphicSection } from '../types';
+import { Section, TextSection, DataChartSection, TableSection, KPISection, PastedGraphicSection, SummaryEvaluationSection } from '../types';
 import { 
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, 
   ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, AreaChart, Area,
@@ -15,7 +15,9 @@ const Card: React.FC<{
     isSelected?: boolean;
     onDelete?: () => void;
     onSelect?: () => void;
-}> = ({ children, styles, isSelected, onDelete, onSelect }) => (
+    noPadding?: boolean;
+    isDynamicHeight?: boolean;
+}> = ({ children, styles, isSelected, onDelete, onSelect, noPadding, isDynamicHeight }) => (
   <div 
     onClick={(e) => { if(onSelect) { e.stopPropagation(); onSelect(); } }}
     className={`group rounded-[2.5rem] border transition-all duration-300 relative w-full flex flex-col overflow-hidden ${
@@ -25,7 +27,7 @@ const Card: React.FC<{
     } ${!onSelect ? 'cursor-default' : 'cursor-pointer'}`}
     style={{ 
         minHeight: styles.height ? `${styles.height}px` : 'auto',
-        height: styles.height ? `${styles.height}px` : 'auto',
+        height: isDynamicHeight ? 'auto' : (styles.height ? `${styles.height}px` : 'auto'),
         textAlign: styles.alignment || 'right',
         backgroundColor: styles.backgroundColor || '#fff'
     }}
@@ -45,7 +47,7 @@ const Card: React.FC<{
       </div>
     )}
 
-    <div className="p-10 flex-1 flex flex-col relative h-full">
+    <div className={`${noPadding ? 'p-0' : 'p-10'} flex-1 flex flex-col relative h-full`}>
       {children}
     </div>
   </div>
@@ -62,6 +64,69 @@ export const SectionPreview: React.FC<{
   const dataFontScale = styles.dataFontScale || 1;
   const labelFontScale = styles.labelFontScale || 1;
   const textColor = styles.color || '#002d72';
+
+  const renderSummaryEvaluation = (sec: SummaryEvaluationSection) => (
+    <div className="flex flex-col gap-8 w-full h-full bg-[#f8fafc] p-8 md:p-12">
+        {/* Top Row: Briefing & Score */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+            {/* Briefing Card */}
+            <div className="bg-white rounded-[2.5rem] p-10 md:p-14 shadow-sm border border-slate-100 flex flex-col relative">
+                <div className="absolute top-12 right-0 w-2.5 h-24 bg-orange-400 rounded-l-full"></div>
+                <p className="text-[#f59e0b] text-[11px] font-black uppercase tracking-[0.25em] mb-6">SUMMARY_BRIEFING</p>
+                <div className="text-[#002d72] italic text-2xl font-semibold leading-[1.8] pr-6">
+                    {sec.briefingText}
+                </div>
+            </div>
+
+            {/* Score Card */}
+            <div className="bg-white rounded-[2.5rem] p-10 md:p-14 shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center">
+                <div className="flex gap-2.5 mb-8">
+                    {[1, 2, 3, 4, 5].map(i => (
+                        <div key={i} className={`h-2.5 w-12 rounded-full transition-all duration-500 ${i <= sec.score ? 'bg-rose-400' : 'bg-slate-100'}`}></div>
+                    ))}
+                </div>
+                <div className="text-rose-500 text-7xl md:text-8xl font-black mb-3 tracking-tighter">{sec.score}/5</div>
+                <div className="text-rose-400 text-xl font-extrabold mb-10">{sec.scoreLabel}</div>
+                <div className="text-[#002d72] text-[11px] font-black uppercase tracking-[0.4em] opacity-30 leading-relaxed">COMPLIANCE MAGNITUDE<br/>VERIFIED</div>
+            </div>
+        </div>
+
+        {/* Bottom Row: Recommendations & Deficiencies */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+            {/* Recommendations */}
+            <div className="bg-[#f0fdf4] rounded-[2.5rem] p-10 md:p-14 border border-emerald-100 shadow-sm h-full">
+                <div className="flex items-center gap-4 mb-10">
+                    <div className="w-4 h-4 bg-emerald-500 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.5)]"></div>
+                    <h3 className="text-emerald-600 font-black text-sm uppercase tracking-widest">המלצות הביקורת</h3>
+                </div>
+                <ul className="space-y-8">
+                    {sec.recommendations.map((item, idx) => (
+                        <li key={idx} className="flex items-start gap-5 group">
+                            <span className="text-emerald-500 font-black mt-1 text-2xl shrink-0">✓</span>
+                            <span className="text-slate-700 font-bold text-lg leading-relaxed">{item}</span>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+
+            {/* Deficiencies */}
+            <div className="bg-[#fff1f2] rounded-[2.5rem] p-10 md:p-14 border border-rose-100 shadow-sm h-full">
+                <div className="flex items-center gap-4 mb-10">
+                    <div className="w-4 h-4 bg-rose-500 rounded-full shadow-[0_0_15px_rgba(244,63,94,0.5)]"></div>
+                    <h3 className="text-rose-600 font-black text-sm uppercase tracking-widest">ליקויים עיקריים</h3>
+                </div>
+                <ul className="space-y-8">
+                    {sec.deficiencies.map((item, idx) => (
+                        <li key={idx} className="flex items-start gap-6">
+                            <span className="text-rose-200 font-black italic text-3xl leading-none shrink-0">{String(idx + 1).padStart(2, '0')}</span>
+                            <span className="text-slate-700 font-bold text-lg leading-relaxed">{item}</span>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        </div>
+    </div>
+  );
 
   const renderKPI = (sec: KPISection) => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-4 flex-1 items-center">
@@ -193,7 +258,7 @@ export const SectionPreview: React.FC<{
                   <Tooltip contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)'}} />
                   {showLegend && <Legend verticalAlign="top" align="right" iconType="circle" wrapperStyle={{paddingBottom: '20px', fontSize: '10px', fontWeight: 'bold'}}/>}
                   {seriesKeys.map((key, i) => (
-                    <Line key={key} type="monotone" dataKey={key} stroke={COLORS[i % COLORS.length]} strokeWidth={5} dot={{ r: 5, strokeWidth: 3, fill: '#fff' }} activeDot={{ r: 8 }} />
+                    <Line key={key} type="monotone" dataKey={key} stroke={COLORS[i % COLORS.length]} strokeWidth={5} strokeLinecap="round" strokeLinejoin="round" dot={{ r: 5, strokeWidth: 3, fill: '#fff' }} activeDot={{ r: 8 }} />
                   ))}
                 </LineChart>
               )}
@@ -205,12 +270,27 @@ export const SectionPreview: React.FC<{
   };
 
   return (
-    <Card styles={styles} isSelected={isSelected} onDelete={onDelete ? () => onDelete(section.id) : undefined} onSelect={onSelect ? () => onSelect(section.id) : undefined}>
-        {section.title && (
+    <Card 
+        styles={styles} 
+        isSelected={isSelected} 
+        onDelete={onDelete ? () => onDelete(section.id) : undefined} 
+        onSelect={onSelect ? () => onSelect(section.id) : undefined}
+        noPadding={section.type === 'summary_evaluation'}
+        isDynamicHeight={section.type === 'summary_evaluation'}
+    >
+        {section.title && section.type !== 'summary_evaluation' && (
           <h2 className="mb-6 tracking-tight leading-tight border-r-8 border-[#002d72] pr-6 font-extrabold shrink-0" style={{ color: textColor, fontSize: `${1.6 * fontScale}rem`, fontWeight: styles.fontWeight || '800' }}>
             {section.title}
           </h2>
         )}
+
+        {section.type === 'summary_evaluation' && (
+            <div className="flex flex-col h-full overflow-visible">
+                <h1 className="text-center text-6xl md:text-7xl font-black text-[#001b44] py-16 tracking-tighter shrink-0">הערכה מסכמת</h1>
+                {renderSummaryEvaluation(section as SummaryEvaluationSection)}
+            </div>
+        )}
+
         {section.type === 'text' && (
           <div className="whitespace-pre-wrap leading-relaxed opacity-95 pr-2 flex-1 overflow-y-auto custom-scrollbar font-semibold" style={{ color: textColor, fontSize: `${1 * fontScale}rem`, lineHeight: '1.6' }}>
             {(section as TextSection).content}
