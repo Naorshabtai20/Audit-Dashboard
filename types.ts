@@ -96,6 +96,16 @@ export interface AnomalySection extends SectionBase {
 
 export type Section = TextSection | PastedGraphicSection | DataChartSection | TableSection | KPISection | SummaryEvaluationSection | DatePickerSection | AnomalySection;
 
+export type ReportTab = {
+    title: string; // tab title
+    icon?: string ; // tab icon
+    subTitles?: string; //sub title under the tab name
+    sections: Section[]; // tab content
+} 
+
 export type Report = {
-    sections: Section[];
+    tabs: ReportTab[];
+    sidebarWidth?: number;
+    tabFontSize?: number;
+    sidebarCollapsed?: boolean;
 };
