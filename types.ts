@@ -105,7 +105,4 @@ export type ReportTab = {
 
 export type Report = {
     tabs: ReportTab[];
-    sidebarWidth?: number;
-    tabFontSize?: number;
-    sidebarCollapsed?: boolean;
 };

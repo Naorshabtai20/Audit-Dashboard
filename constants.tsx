@@ -2,7 +2,6 @@
 import { Report } from './types';
 
 export const INITIAL_REPORT: Report = {
-    sidebarWidth: 120,
     tabs: [
         {
             title: "ראשי",
@@ -14,7 +13,7 @@ export const INITIAL_REPORT: Report = {
                     type: "text",
                     title: "דו\"ח ביצועים שנתי - 2024",
                     content: "ברוכים הבאים למערכת הפקת הדו\"חות החדשה. כאן תוכלו לעצב מסמכים מקצועיים בלחיצת כפתור ולגרור אותם כדי לסדר את המבנה.",
-                    styles: { colSpan: 12, fontScale: 1.2, alignment: 'right', color: '#0f172a', fontWeight: '800' }
+                    styles: { colSpan: 12, fontScale: 1.2, alignment: 'right', color: '#002d72', fontWeight: '800' }
                 },
                 {
                     id: "sec-kpi-1",
