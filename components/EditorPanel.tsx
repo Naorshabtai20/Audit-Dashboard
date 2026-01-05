@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Section, SectionType, Report, DataChartSection, TableSection, KPISection, SectionStyles, KPIMetric, PastedGraphicSection, SummaryEvaluationSection } from '../types';
+import { Section, SectionType, Report, DataChartSection, TableSection, KPISection, SectionStyles, KPIMetric, PastedGraphicSection, SummaryEvaluationSection, DatePickerSection } from '../types';
 
 interface EditorPanelProps {
   report: Report;
@@ -15,6 +15,7 @@ const SECTION_OPTIONS = [
   { type: 'text' as SectionType, label: 'טקסט מעוצב', icon: '📝' },
   { type: 'kpi' as SectionType, label: 'מדדי KPI', icon: '🎯' },
   { type: 'summary_evaluation' as SectionType, label: 'הערכה מסכמת', icon: '⚖️' },
+  { type: 'date_picker' as SectionType, label: 'תאריכון', icon: '📅' },
   { type: 'data_chart' as SectionType, label: 'גרף נתונים', icon: '📊' },
   { type: 'table' as SectionType, label: 'טבלת נתונים', icon: '📅' },
   { type: 'pasted_graphic' as SectionType, label: 'תמונה / גרפיקה', icon: '🖼️' },
@@ -207,10 +208,11 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
               onClick={() => {
                 const id = `sec-${Date.now()}`;
                 const newSec = { 
-                  id, type: opt.type, title: opt.label, styles: { colSpan: 12, height: opt.type === 'summary_evaluation' ? 900 : 400, fontScale: 1, dataFontScale: 1, labelFontScale: 1, alignment: 'right' },
+                  id, type: opt.type, title: opt.label, styles: { colSpan: 12, height: opt.type === 'summary_evaluation' ? 900 : (opt.type === 'date_picker' ? 180 : 400), fontScale: 1, dataFontScale: 1, labelFontScale: 1, alignment: 'right' },
                   ...(opt.type === 'text' ? { content: 'הזן טקסט כאן...' } : {}),
                   ...(opt.type === 'kpi' ? { metrics: [{ label: 'מדד לדוגמה', value: '1,200', delta: '+5%', trend: 'up' }] } : {}),
                   ...(opt.type === 'summary_evaluation' ? { briefingText: 'ממצאי הביקורת מעלים תמונה מורכבת...', score: 4, scoreLabel: 'טעון שיפור', recommendations: ['הטמעת כלי התאמות אוטומטי'], deficiencies: ['חוסר התאמה מתמשך בין יתרות'] } : {}),
+                  ...(opt.type === 'date_picker' ? { date: new Date().toISOString().split('T')[0], label: 'מועד ביצוע סופי', icon: '📅' } : {}),
                   ...(opt.type === 'table' ? { headers: ['כותרת 1', 'כותרת 2'], rows: [['נתון 1', 'נתון 2']] } : {}),
                   ...(opt.type === 'data_chart' ? { chartKind: 'bar', data: [{ x: 'א', y: 10 }, { x: 'ב', y: 20 }], seriesKeys: ['y'], xKey: 'x' } : {}),
                   ...(opt.type === 'pasted_graphic' ? { src: '', caption: '' } : {})
@@ -256,11 +258,40 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
                 </div>
                 <input type="range" min="150" max="2500" step="10" value={selectedSection.styles?.height || 400} onChange={e => updateStyles(selectedId!, { height: parseInt(e.target.value) })} className="w-full h-3 bg-blue-100 rounded-lg accent-[#002d72] cursor-pointer" />
               </div>
+              
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                    <span className="text-xl font-bold text-slate-600">גודל טקסט ראשי</span>
+                    <span className="text-xl font-extrabold text-[#002d72]">{selectedSection.styles?.dataFontScale}</span>
+                </div>
+                <input type="range" min="0.5" max="5" step="0.1" value={selectedSection.styles?.dataFontScale || 1} onChange={e => updateStyles(selectedId!, { dataFontScale: parseFloat(e.target.value) })} className="w-full h-3 bg-blue-100 rounded-lg accent-[#002d72] cursor-pointer" />
+              </div>
             </div>
 
             {/* Content Properties */}
             <div className="space-y-10">
-              {selectedSection.type === 'summary_evaluation' ? (
+              {selectedSection.type === 'date_picker' ? (
+                <div className="space-y-8">
+                    <div className="space-y-4">
+                        <label className="text-xl font-extrabold text-[#002d72] block px-2 italic">תווית התאריך</label>
+                        <input 
+                            type="text" 
+                            value={(selectedSection as DatePickerSection).label} 
+                            onChange={e => updateSection(selectedId!, { label: e.target.value })} 
+                            className="w-full p-6 bg-slate-50 border rounded-2xl font-bold text-lg outline-none focus:border-[#002d72]"
+                        />
+                    </div>
+                    <div className="space-y-4">
+                        <label className="text-xl font-extrabold text-[#002d72] block px-2 italic">בחירת תאריך</label>
+                        <input 
+                            type="date" 
+                            value={(selectedSection as DatePickerSection).date} 
+                            onChange={e => updateSection(selectedId!, { date: e.target.value })} 
+                            className="w-full p-6 bg-slate-50 border rounded-2xl font-bold text-lg outline-none focus:border-[#002d72]"
+                        />
+                    </div>
+                </div>
+              ) : selectedSection.type === 'summary_evaluation' ? (
                 <div className="space-y-10">
                     <div className="space-y-4">
                         <label className="text-xl font-extrabold text-[#002d72] block px-2 italic">טקסט סקירה (Briefing)</label>

@@ -1,5 +1,5 @@
 
-export type SectionType = "text" | "pasted_graphic" | "data_chart" | "table" | "kpi" | "summary_evaluation";
+export type SectionType = "text" | "pasted_graphic" | "data_chart" | "table" | "kpi" | "summary_evaluation" | "date_picker";
 
 export interface SectionStyles {
     colSpan?: number; // 1-12 columns in grid
@@ -69,7 +69,14 @@ export interface SummaryEvaluationSection extends SectionBase {
     deficiencies: string[];
 }
 
-export type Section = TextSection | PastedGraphicSection | DataChartSection | TableSection | KPISection | SummaryEvaluationSection;
+export interface DatePickerSection extends SectionBase {
+    type: "date_picker";
+    date: string;
+    label: string;
+    icon?: string;
+}
+
+export type Section = TextSection | PastedGraphicSection | DataChartSection | TableSection | KPISection | SummaryEvaluationSection | DatePickerSection;
 
 export type Report = {
     sections: Section[];

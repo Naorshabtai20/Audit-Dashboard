@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Section, TextSection, DataChartSection, TableSection, KPISection, PastedGraphicSection, SummaryEvaluationSection } from '../types';
+import { Section, TextSection, DataChartSection, TableSection, KPISection, PastedGraphicSection, SummaryEvaluationSection, DatePickerSection } from '../types';
 import { 
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, 
   ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, AreaChart, Area,
@@ -17,13 +17,16 @@ const Card: React.FC<{
     onSelect?: () => void;
     noPadding?: boolean;
     isDynamicHeight?: boolean;
-}> = ({ children, styles, isSelected, onDelete, onSelect, noPadding, isDynamicHeight }) => (
+    pill?: boolean;
+}> = ({ children, styles, isSelected, onDelete, onSelect, noPadding, isDynamicHeight, pill }) => (
   <div 
     onClick={(e) => { if(onSelect) { e.stopPropagation(); onSelect(); } }}
     className={`group transition-all duration-300 relative w-full flex flex-col overflow-hidden ${
+        pill ? 'rounded-[100px]' : 'rounded-[2.5rem]'
+    } ${
         isSelected 
-        ? 'bg-white shadow-[0_40px_100px_-20px_rgba(0,45,114,0.15)] border-[#002d72] scale-[1.01] z-30 border rounded-[3rem]' 
-        : 'bg-white shadow-lg border border-slate-100 hover:border-slate-200 z-10 hover:shadow-xl rounded-[2.5rem]'
+        ? 'bg-white shadow-[0_40px_100px_-20px_rgba(0,45,114,0.15)] border-[#002d72] scale-[1.01] z-30 border' 
+        : 'bg-white shadow-lg border border-slate-100 hover:border-slate-200 z-10 hover:shadow-xl'
     } ${!onSelect ? 'cursor-default' : 'cursor-pointer'}`}
     style={{ 
         minHeight: styles.height ? `${styles.height}px` : 'auto',
@@ -41,7 +44,7 @@ const Card: React.FC<{
       </button>
     )}
     
-    <div className={`${noPadding ? 'p-0' : 'p-10'} flex-1 flex flex-col relative h-full overflow-visible`}>
+    <div className={`${noPadding ? 'p-0' : 'p-10'} flex-1 flex flex-col relative h-full overflow-visible justify-center`}>
       {children}
     </div>
   </div>
@@ -58,6 +61,34 @@ export const SectionPreview: React.FC<{
   const dataFontScale = styles.dataFontScale || 1;
   const labelFontScale = styles.labelFontScale || 1;
   const textColor = styles.color || '#002d72';
+
+  const renderDatePicker = (sec: DatePickerSection) => {
+    // Format date from YYYY-MM-DD to DD/MM/YYYY
+    const displayDate = sec.date ? sec.date.split('-').reverse().join('/') : 'בחר תאריך';
+    
+    return (
+      <div className="flex items-center gap-8 px-6">
+        <div className="w-24 h-24 bg-blue-50 hover:bg-blue-100 transition-colors rounded-[2rem] flex items-center justify-center shadow-inner shrink-0">
+          <span className="text-5xl">{sec.icon || '📅'}</span>
+        </div>
+
+        <div className="flex flex-col text-right">
+          <span 
+            className="font-black uppercase tracking-[0.2em] mb-2 opacity-60"
+            style={{ fontSize: `${11 * labelFontScale}px`, color: textColor }}
+          >
+            {sec.label || 'מועד ביצוע סופי'}
+          </span>
+          <span 
+            className="font-black tracking-tighter leading-none"
+            style={{ fontSize: `${2.5 * dataFontScale}rem`, color: textColor }}
+          >
+            {displayDate}
+          </span>
+        </div>
+      </div>
+    );
+  };
 
   const renderSummaryEvaluation = (sec: SummaryEvaluationSection) => (
     <div className="flex flex-col gap-12 w-full h-full bg-[#f8fafc] p-10 md:p-16">
@@ -283,9 +314,10 @@ export const SectionPreview: React.FC<{
         onDelete={onDelete ? () => onDelete(section.id) : undefined} 
         onSelect={onSelect ? () => onSelect(section.id) : undefined}
         noPadding={section.type === 'summary_evaluation'}
-        isDynamicHeight={section.type === 'summary_evaluation'}
+        isDynamicHeight={section.type === 'summary_evaluation' || section.type === 'date_picker'}
+        pill={section.type === 'date_picker'}
     >
-        {section.title && section.type !== 'summary_evaluation' && (
+        {section.title && section.type !== 'summary_evaluation' && section.type !== 'date_picker' && (
           <h2 className="mb-6 tracking-tight leading-tight border-r-8 border-[#002d72] pr-6 font-extrabold shrink-0" style={{ color: textColor, fontSize: `${1.6 * fontScale}rem`, fontWeight: styles.fontWeight || '800' }}>
             {section.title}
           </h2>
@@ -297,6 +329,8 @@ export const SectionPreview: React.FC<{
                 {renderSummaryEvaluation(section as SummaryEvaluationSection)}
             </div>
         )}
+
+        {section.type === 'date_picker' && renderDatePicker(section as DatePickerSection)}
 
         {section.type === 'text' && (
           <div className="whitespace-pre-wrap leading-relaxed opacity-95 pr-2 flex-1 overflow-y-auto custom-scrollbar font-semibold" style={{ color: textColor, fontSize: `${1 * fontScale}rem`, lineHeight: '1.6' }}>
