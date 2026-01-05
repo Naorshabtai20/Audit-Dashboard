@@ -65,30 +65,75 @@ export const SectionPreview: React.FC<{
   const textColor = styles.color || '#002d72';
 
   const renderSummaryEvaluation = (sec: SummaryEvaluationSection) => (
-    <div className="grid grid-cols-12 gap-6 w-full h-full p-8 bg-[#f8fbff] overflow-y-auto custom-scrollbar">
-      <div className="col-span-12 lg:col-span-8 bg-white rounded-[2.5rem] p-12 shadow-sm flex flex-col relative border border-slate-100">
-        <span className="text-[10px] font-black text-orange-500 uppercase tracking-[0.3em] mb-6">SUMMARY_BRIEFING</span>
-        <div className="flex-1 flex items-center">
-            <p className="text-[#002d72] font-extrabold italic leading-relaxed text-right" style={{ fontSize: `${1.4 * dataFontScale}rem` }}>
-              "{sec.briefingText || 'הזן טקסט סיכום כאן...'}"
-            </p>
+    <div className="flex flex-col gap-8 w-full h-full p-2 overflow-y-auto custom-scrollbar">
+      {/* Top Row: Briefing and Score */}
+      <div className="grid grid-cols-12 gap-8 min-h-[500px]">
+        {/* Left: Summary Briefing */}
+        <div className="col-span-12 lg:col-span-8 bg-white rounded-[3rem] p-12 shadow-md border border-slate-100 flex flex-col relative">
+          <span className="text-[10px] font-black text-orange-500 uppercase tracking-[0.4em] mb-8 text-right block w-full">SUMMARY_BRIEFING</span>
+          <div className="flex-1 flex items-center justify-end">
+              <p className="text-[#002d72] font-black italic leading-tight text-right w-full" style={{ fontSize: `${2 * dataFontScale}rem`, letterSpacing: '-0.02em' }}>
+                "{sec.briefingText || 'הזן טקסט סיכום כאן...'}"
+              </p>
+          </div>
+          <div className="mt-12 h-2 w-32 bg-orange-400 rounded-full self-end"></div>
         </div>
-        <div className="mt-8 h-1.5 w-24 bg-orange-400 rounded-full"></div>
+
+        {/* Right: Score Display */}
+        <div className="col-span-12 lg:col-span-4 bg-white rounded-[3rem] p-12 shadow-md border border-slate-100 flex flex-col items-center justify-center text-center relative">
+          {/* Score Segments */}
+          <div className="flex gap-2.5 mb-12">
+             {[1,2,3,4,5].map(i => (
+               <div key={i} className={`h-2.5 w-12 rounded-full transition-all duration-700 ${i <= sec.score ? 'bg-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.3)]' : 'bg-slate-100'}`}></div>
+             ))}
+          </div>
+          
+          <div className="flex flex-col items-center">
+            <span className="text-[6rem] font-black text-rose-500 leading-none tracking-tighter" style={{ fontFamily: 'Segoe UI, Arial, sans-serif' }}>{sec.score || 0}/5</span>
+            <span className="text-xl font-black text-rose-500 mt-4 uppercase tracking-widest">{sec.scoreLabel || 'סטטוס'}</span>
+          </div>
+
+          <div className="mt-16 pt-8 border-t border-slate-50 w-full flex justify-center">
+             <span className="text-[10px] font-black text-blue-900/20 uppercase tracking-[0.4em] leading-none">{sec.footerLabel || 'COMPLIANCE MAGNITUDE VERIFIED'}</span>
+          </div>
+        </div>
       </div>
 
-      <div className="col-span-12 lg:col-span-4 bg-white rounded-[2.5rem] p-12 shadow-sm flex flex-col items-center justify-center text-center border border-slate-100">
-        <div className="flex gap-2 mb-10">
-           {[1,2,3,4,5].map(i => (
-             <div key={i} className={`h-2.5 w-10 rounded-full transition-all duration-500 ${i <= sec.score ? 'bg-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.4)]' : 'bg-slate-100'}`}></div>
-           ))}
-        </div>
-        <div className="flex flex-col items-center">
-          <span className="text-7xl font-black text-rose-500 leading-none tracking-tighter">{sec.score || 0}/5</span>
-          <span className="text-xl font-black text-rose-500 mt-4 uppercase tracking-widest">{sec.scoreLabel || 'סטטוס'}</span>
-        </div>
-        <div className="mt-14 pt-6 border-t border-slate-50 w-full">
-           <span className="text-[9px] font-black text-blue-900/30 uppercase tracking-[0.3em] leading-none">{sec.footerLabel || 'COMPLIANCE MAGNITUDE VERIFIED'}</span>
-        </div>
+      {/* Bottom Row: Deficiencies and Recommendations */}
+      <div className="grid grid-cols-12 gap-8">
+          {/* Recommendations Box (Audit) */}
+          <div className="col-span-12 lg:col-span-6 bg-[#f8fbff] rounded-[3rem] p-12 shadow-sm border border-emerald-50 relative">
+              <div className="flex items-center gap-3 justify-end mb-10">
+                  <h3 className="text-xl font-black text-emerald-700">המלצות הביקורת</h3>
+                  <div className="w-3 h-3 bg-emerald-400 rounded-full"></div>
+              </div>
+              <ul className="space-y-6">
+                  {(sec.recommendations || []).map((item, idx) => (
+                      <li key={idx} className="flex items-start gap-4 justify-end text-right">
+                          <p className="text-slate-700 font-bold text-lg leading-snug">{item}</p>
+                          <span className="text-emerald-500 text-xl font-black shrink-0">✓</span>
+                      </li>
+                  ))}
+              </ul>
+          </div>
+
+          {/* Deficiencies Box (Main) */}
+          <div className="col-span-12 lg:col-span-6 bg-[#fff8f8] rounded-[3rem] p-12 shadow-sm border border-rose-50 relative">
+              <div className="flex items-center gap-3 justify-end mb-10">
+                  <h3 className="text-xl font-black text-rose-700">ליקויים עיקריים</h3>
+                  <div className="w-3 h-3 bg-rose-500 rounded-full"></div>
+              </div>
+              <ul className="space-y-8">
+                  {(sec.deficiencies || []).map((item, idx) => (
+                      <li key={idx} className="flex items-center gap-6 justify-end text-right group">
+                          <p className="text-slate-700 font-black text-lg leading-snug">{item}</p>
+                          <span className="text-3xl font-black italic text-slate-200/60 group-hover:text-rose-200 transition-colors leading-none">
+                              {(idx + 1).toString().padStart(2, '0')}
+                          </span>
+                      </li>
+                  ))}
+              </ul>
+          </div>
       </div>
     </div>
   );
@@ -277,7 +322,7 @@ export const SectionPreview: React.FC<{
         onDelete={onDelete ? () => onDelete(section.id) : undefined} 
         onSelect={onSelect ? () => onSelect(section.id) : undefined} 
         noPadding={section.type === 'summary_evaluation' || section.type === 'kpi' || section.type === 'anomaly' || section.type === 'pasted_graphic'}
-        isDynamicHeight={section.type === 'date_picker' || section.type === 'anomaly' || section.type === 'pasted_graphic'}
+        isDynamicHeight={section.type === 'date_picker' || section.type === 'anomaly' || section.type === 'pasted_graphic' || section.type === 'summary_evaluation'}
         pill={section.type === 'date_picker'}
         className={section.type === 'summary_evaluation' ? 'bg-[#f8fbff]' : ''}
     >
