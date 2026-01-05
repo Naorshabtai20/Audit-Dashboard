@@ -63,7 +63,7 @@ export interface KPISection extends SectionBase {
 export interface SummaryEvaluationSection extends SectionBase {
     type: "summary_evaluation";
     briefingText: string;
-    score: number; // 1 to 5
+    score: number;
     scoreLabel: string;
     recommendations: string[];
     deficiencies: string[];
