@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Section, SectionType, Report, DataChartSection, TableSection, KPISection, SectionStyles, KPIMetric, PastedGraphicSection, SummaryEvaluationSection, DatePickerSection } from '../types';
+import { Section, SectionType, Report, DataChartSection, TableSection, KPISection, SectionStyles, KPIMetric, SummaryEvaluationSection, DatePickerSection, AnomalySection, AnomalyItem, TextSection } from '../types';
 
 interface EditorPanelProps {
   report: Report;
@@ -15,15 +15,22 @@ const SECTION_OPTIONS = [
   { type: 'text' as SectionType, label: 'טקסט מעוצב', icon: '📝' },
   { type: 'kpi' as SectionType, label: 'מדדי KPI', icon: '🎯' },
   { type: 'summary_evaluation' as SectionType, label: 'הערכה מסכמת', icon: '⚖️' },
+  { type: 'anomaly' as SectionType, label: 'רשימת ממצאים', icon: '🔍' },
   { type: 'date_picker' as SectionType, label: 'תאריכון', icon: '📅' },
   { type: 'data_chart' as SectionType, label: 'גרף נתונים', icon: '📊' },
   { type: 'table' as SectionType, label: 'טבלת נתונים', icon: '📅' },
   { type: 'pasted_graphic' as SectionType, label: 'תמונה / גרפיקה', icon: '🖼️' },
 ];
 
+const CHART_KINDS = [
+  { id: 'bar', label: 'עמודות', icon: '📊' },
+  { id: 'line', label: 'קווי', icon: '📈' },
+  { id: 'pie', label: 'עוגה', icon: '🍕' },
+  { id: 'donut', label: 'דונאט', icon: '🍩' },
+];
+
 export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, selectedId, onSelect, onMove, onCloseSidebar }) => {
   const [pasteBuffer, setPasteBuffer] = useState('');
-  const [clipboard, setClipboard] = useState<Section | null>(null);
 
   useEffect(() => {
     const section = report.sections.find(s => s.id === selectedId);
@@ -57,80 +64,18 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
     updateSection(id, { styles: { ...(section.styles || {}), ...styleUpdates } });
   };
 
-  const handleListItemUpdate = (id: string, field: 'recommendations' | 'deficiencies', index: number, value: string) => {
-    const section = report.sections.find(s => s.id === id) as SummaryEvaluationSection;
-    if (!section) return;
-    const newList = [...section[field]];
-    newList[index] = value;
-    updateSection(id, { [field]: newList });
-  };
-
-  const addListItem = (id: string, field: 'recommendations' | 'deficiencies') => {
-    const section = report.sections.find(s => s.id === id) as SummaryEvaluationSection;
-    if (!section) return;
-    updateSection(id, { [field]: [...section[field], 'סעיף חדש...'] });
-  };
-
-  const removeListItem = (id: string, field: 'recommendations' | 'deficiencies', index: number) => {
-    const section = report.sections.find(s => s.id === id) as SummaryEvaluationSection;
-    if (!section) return;
-    updateSection(id, { [field]: section[field].filter((_, i) => i !== index) });
-  };
-
   const updateKPIMetric = (sectionId: string, metricIndex: number, updates: Partial<KPIMetric>) => {
     const section = report.sections.find(s => s.id === sectionId) as KPISection;
     if (!section || section.type !== 'kpi') return;
     const newMetrics = [...section.metrics];
     newMetrics[metricIndex] = { ...newMetrics[metricIndex], ...updates };
-    
-    if (updates.delta !== undefined) {
-        const numericDelta = parseFloat(updates.delta.toString().replace(/[^\d.-]/g, ''));
-        newMetrics[metricIndex].trend = numericDelta < 0 ? 'down' : numericDelta > 0 ? 'up' : 'flat';
-    }
-    
     updateSection(sectionId, { metrics: newMetrics });
-  };
-
-  const addKPIMetric = (sectionId: string) => {
-    const section = report.sections.find(s => s.id === sectionId) as KPISection;
-    if (!section) return;
-    const newMetrics = [...(section.metrics || []), { label: 'מדד חדש', value: '1,000', delta: '+10%', trend: 'up' }];
-    updateSection(sectionId, { metrics: newMetrics } as any);
-  };
-
-  const removeKPIMetric = (sectionId: string, index: number) => {
-    const section = report.sections.find(s => s.id === sectionId) as KPISection;
-    if (!section) return;
-    updateSection(sectionId, { metrics: section.metrics.filter((_, i) => i !== index) });
-  };
-
-  const handlePasteObject = () => {
-    if (!clipboard) return;
-    const newId = `sec-${Date.now()}`;
-    onUpdate({ ...report, sections: [...report.sections, { ...JSON.parse(JSON.stringify(clipboard)), id: newId }] });
-    onSelect(newId);
-  };
-
-  const handleImagePaste = (e: React.ClipboardEvent) => {
-    const items = e.clipboardData.items;
-    for (const item of items) {
-      if (item.type.indexOf('image') !== -1) {
-        const blob = item.getAsFile();
-        if (!blob) continue;
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const base64 = event.target?.result as string;
-          if (selectedId) updateSection(selectedId, { src: base64 } as any);
-        };
-        reader.readAsDataURL(blob);
-      }
-    }
   };
 
   const handleDataPaste = (text: string, sectionId: string) => {
     const section = report.sections.find(s => s.id === sectionId);
     if (!text || !text.trim() || !section) return;
-
+    
     const lines = text.trim().split(/\r?\n/).map(l => l.split(/\t|,/).map(cell => cell.trim()));
     if (lines.length === 0) return;
 
@@ -141,14 +86,15 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
       const isLikelyData = (val: string) => !isNaN(parseFloat(val?.replace(/[^\d.-]/g, '')));
       const hasHeader = firstRow.slice(1).some(cell => !isLikelyData(cell));
       
-      let xKey = hasHeader ? firstRow[0] || 'ציר X' : 'ציר X';
-      let seriesKeys = hasHeader ? firstRow.slice(1).map((h, i) => h || `סדרה ${i + 1}`) : firstRow.slice(1).map((_, i) => `סדרה ${i + 1}`);
+      let xKey = hasHeader ? firstRow[0] || 'x' : 'x';
+      let seriesKeys = hasHeader ? firstRow.slice(1) : firstRow.slice(1).map((_, i) => `Series ${i+1}`);
       let dataRows = hasHeader ? lines.slice(1) : lines;
-
+      
       const parsedData = dataRows.map(row => {
         const obj: Record<string, any> = { [xKey]: row[0] || '' };
         seriesKeys.forEach((key, i) => {
-          const val = parseFloat((row[i + 1] || '0').replace(/[^\d.-]/g, ''));
+          const valString = (row[i + 1] || '0').replace(/[^\d.-]/g, '');
+          const val = parseFloat(valString);
           obj[key] = isNaN(val) ? 0 : val;
         });
         return obj;
@@ -162,393 +108,229 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
 
   return (
     <div className="flex flex-col h-full bg-white border-l border-slate-200" dir="rtl">
-      {/* Header */}
-      <div className="p-10 bg-[#002d72] text-white shadow-xl flex justify-between items-center shrink-0">
+      <div className="p-8 bg-[#002d72] text-white flex justify-between items-center shrink-0">
         <div>
-          <h2 className="text-3xl font-extrabold tracking-tight leading-tight">מעצב הדו"ח</h2>
-          <p className="text-[12px] opacity-60 uppercase tracking-[0.2em] mt-2 font-bold">Designer Tools Pro</p>
+          <h2 className="text-2xl font-black tracking-tight text-white">מעצב הדו"ח</h2>
+          <p className="text-[10px] opacity-60 font-bold uppercase tracking-widest mt-1">Professional Report Builder</p>
         </div>
-        <button onClick={onCloseSidebar} className="p-4 bg-white/10 hover:bg-white/20 rounded-2xl transition-all font-bold text-sm">סגור</button>
+        <button onClick={onCloseSidebar} className="p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-all">✕</button>
       </div>
 
-      {/* Main Content List */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-5 bg-[#f8f9fc] custom-scrollbar">
-        <div className="flex justify-between items-center px-2">
-            <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">רשימת אובייקטים</p>
-            {clipboard && (
-                <button onClick={handlePasteObject} className="bg-emerald-500 text-white text-[12px] font-bold px-5 py-2.5 rounded-2xl hover:bg-emerald-600 shadow-lg transition-all">
-                    📋 הדבק אובייקט
-                </button>
-            )}
-        </div>
-
+      <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50 custom-scrollbar">
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-2 mb-2">אובייקטים בדו"ח</p>
         {report.sections.map((sec) => (
           <button 
             key={sec.id} 
             onClick={() => onSelect(sec.id)}
-            className={`w-full p-6 rounded-[2rem] border-2 text-right transition-all flex items-center justify-between group ${
-              selectedId === sec.id ? 'border-[#002d72] bg-white shadow-xl translate-x-2' : 'border-transparent bg-white hover:border-slate-200 shadow-md'
+            className={`w-full p-4 rounded-2xl border-2 text-right transition-all flex items-center justify-between ${
+              selectedId === sec.id ? 'border-[#002d72] bg-white shadow-lg' : 'border-transparent bg-white hover:border-slate-200 shadow-sm'
             }`}
           >
-            <div className="flex items-center gap-4 overflow-hidden">
-              <span className="text-3xl opacity-70 shrink-0">{SECTION_OPTIONS.find(o => o.type === sec.type)?.icon}</span>
-              <div className="flex flex-col text-right overflow-hidden">
-                <span className={`font-bold text-xl truncate ${selectedId === sec.id ? 'text-[#002d72]' : 'text-slate-700'}`}>{sec.title || 'ללא כותרת'}</span>
-                <span className="text-[12px] text-slate-400 font-bold uppercase tracking-widest mt-1">{sec.styles?.colSpan || 12}/12 עמודות</span>
+            <div className="flex items-center gap-3">
+              <span className="text-2xl opacity-50">{SECTION_OPTIONS.find(o => o.type === sec.type)?.icon}</span>
+              <div className="flex flex-col text-right">
+                <span className={`font-bold text-sm ${selectedId === sec.id ? 'text-[#002d72]' : 'text-slate-700'}`}>{sec.title || 'ללא כותרת'}</span>
+                <span className="text-[10px] text-slate-400">{sec.styles?.colSpan || 12}/12 | גובה: {sec.styles?.height || '400'}px</span>
               </div>
             </div>
           </button>
         ))}
         
-        {/* Creation Buttons */}
-        <div className="grid grid-cols-2 gap-4 pt-6 border-t border-slate-200">
+        <div className="grid grid-cols-2 gap-3 mt-6 pt-6 border-t border-slate-200">
           {SECTION_OPTIONS.map(opt => (
-            <button 
-              key={opt.type} 
-              onClick={() => {
+            <button key={opt.type} onClick={() => {
                 const id = `sec-${Date.now()}`;
                 const newSec = { 
-                  id, type: opt.type, title: opt.label, styles: { colSpan: 12, height: opt.type === 'summary_evaluation' ? 900 : (opt.type === 'date_picker' ? 180 : 400), fontScale: 1, dataFontScale: 1, labelFontScale: 1, alignment: 'right' },
-                  ...(opt.type === 'text' ? { content: 'הזן טקסט כאן...' } : {}),
-                  ...(opt.type === 'kpi' ? { metrics: [{ label: 'מדד לדוגמה', value: '1,200', delta: '+5%', trend: 'up' }] } : {}),
-                  ...(opt.type === 'summary_evaluation' ? { briefingText: 'ממצאי הביקורת מעלים תמונה מורכבת...', score: 4, scoreLabel: 'טעון שיפור', recommendations: ['הטמעת כלי התאמות אוטומטי'], deficiencies: ['חוסר התאמה מתמשך בין יתרות'] } : {}),
-                  ...(opt.type === 'date_picker' ? { date: new Date().toISOString().split('T')[0], label: 'מועד ביצוע סופי', icon: '📅' } : {}),
-                  ...(opt.type === 'table' ? { headers: ['כותרת 1', 'כותרת 2'], rows: [['נתון 1', 'נתון 2']] } : {}),
-                  ...(opt.type === 'data_chart' ? { chartKind: 'bar', data: [{ x: 'א', y: 10 }, { x: 'ב', y: 20 }], seriesKeys: ['y'], xKey: 'x' } : {}),
-                  ...(opt.type === 'pasted_graphic' ? { src: '', caption: '' } : {})
+                  id, type: opt.type, title: opt.label, 
+                  styles: { colSpan: 12, height: opt.type === 'summary_evaluation' ? 700 : 400, fontScale: 1, dataFontScale: 1, labelFontScale: 1, alignment: 'right' },
+                  ...(opt.type === 'summary_evaluation' ? { briefingText: 'הזן סיכום...', score: 4, scoreLabel: 'תקין', footerLabel: 'COMPLIANCE MAGNITUDE VERIFIED', recommendations: ['המלצה 1'], deficiencies: ['ליקוי 1'] } : {}),
+                  ...(opt.type === 'kpi' ? { metrics: [{ label: 'מדד חדש', value: '0', delta: '+0%', trend: 'up' }] } : {}),
+                  ...(opt.type === 'date_picker' ? { date: new Date().toISOString().split('T')[0], label: 'תאריך הדו"ח' } : {}),
+                  ...(opt.type === 'data_chart' ? { chartKind: 'bar', data: [{x: 'א', y: 10}], xKey: 'x', seriesKeys: ['y'] } : {}),
+                  ...(opt.type === 'table' ? { headers: ['כותרת'], rows: [['נתון']] } : {}),
+                  ...(opt.type === 'text' ? { content: 'תוכן טקסט...' } : {})
                 };
                 onUpdate({ ...report, sections: [...report.sections, newSec as any] });
                 onSelect(id);
-              }}
-              className="flex flex-col items-center gap-3 p-6 bg-white border border-slate-100 rounded-[2.2rem] hover:bg-[#002d72] hover:text-white transition-all text-[15px] font-bold shadow-md"
-            >
-              <span className="text-4xl">{opt.icon}</span> {opt.label}
+            }} className="flex flex-col items-center gap-2 p-4 bg-white border border-slate-100 rounded-2xl hover:bg-[#002d72] hover:text-white transition-all text-xs font-bold shadow-sm">
+              <span className="text-2xl">{opt.icon}</span> {opt.label}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Settings Panel */}
       {selectedSection && (
-        <div className="h-[85%] border-t border-slate-200 bg-white p-10 overflow-y-auto shadow-[0_-25px_50px_-12px_rgba(0,0,0,0.15)] z-50 custom-scrollbar animate-in slide-in-from-bottom-8">
-          <div className="flex justify-between items-center mb-10 border-b border-slate-100 pb-8">
-            <h3 className="text-2xl font-extrabold text-[#002d72]">הגדרות ועיצוב אובייקט</h3>
-            <div className="flex gap-3">
-                <button onClick={() => onSelect(null)} className="w-12 h-12 flex items-center justify-center bg-slate-50 border border-slate-200 rounded-full text-slate-400 font-bold transition-all hover:bg-slate-100">✕</button>
-            </div>
+        <div className="h-[75%] border-t bg-white p-8 overflow-y-auto shadow-2xl z-50 custom-scrollbar animate-in slide-in-from-bottom duration-300 text-right">
+          <div className="flex justify-between items-center mb-8 border-b pb-6">
+            <h3 className="text-xl font-black text-[#002d72]">עריכת אובייקט</h3>
+            <button onClick={() => onSelect(null)} className="text-slate-300 font-bold hover:text-slate-600">סגור ✕</button>
           </div>
 
-          <div className="space-y-12 text-right pb-12">
-            {/* Visual Properties */}
-            <div className="space-y-10 bg-[#f8f9fc] p-10 rounded-[2.5rem] border border-slate-100 shadow-inner">
-              <label className="text-xl font-extrabold text-[#002d72] uppercase tracking-[0.05em] block mb-6">מאפייני תצוגה</label>
-              
-              <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                    <span className="text-xl font-bold text-slate-600">רוחב (עמודות)</span>
-                    <span className="text-xl font-extrabold text-[#002d72]">{selectedSection.styles?.colSpan}</span>
-                </div>
-                <input type="range" min="1" max="12" step="1" value={selectedSection.styles?.colSpan || 12} onChange={e => updateStyles(selectedId!, { colSpan: parseInt(e.target.value) })} className="w-full h-3 bg-blue-100 rounded-lg accent-[#002d72] cursor-pointer" />
+          <div className="space-y-10">
+            {/* Typography Controls */}
+            <div className="bg-[#f0f7ff] p-6 rounded-3xl space-y-6">
+              <p className="text-[10px] font-black text-[#002d72] uppercase tracking-widest border-b border-blue-100 pb-2">קנה מידה ופונטים</p>
+              <div className="space-y-4">
+                <div className="flex justify-between text-[11px] font-bold"><span>פונט צירים ומקרא (גרפים)</span><span>{selectedSection.styles?.labelFontScale}x</span></div>
+                <input type="range" min="0.5" max="2.5" step="0.1" value={selectedSection.styles?.labelFontScale || 1} onChange={e => updateStyles(selectedId!, { labelFontScale: parseFloat(e.target.value) })} className="w-full accent-[#002d72]" />
               </div>
-
-              <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                    <span className="text-xl font-bold text-slate-600">גובה (פיקסלים)</span>
-                    <span className="text-xl font-extrabold text-[#002d72]">{selectedSection.styles?.height}px</span>
-                </div>
-                <input type="range" min="150" max="2500" step="10" value={selectedSection.styles?.height || 400} onChange={e => updateStyles(selectedId!, { height: parseInt(e.target.value) })} className="w-full h-3 bg-blue-100 rounded-lg accent-[#002d72] cursor-pointer" />
+              <div className="space-y-4">
+                <div className="flex justify-between text-[11px] font-bold"><span>פונט ערכים פנימיים</span><span>{selectedSection.styles?.dataFontScale}x</span></div>
+                <input type="range" min="0.5" max="2.5" step="0.1" value={selectedSection.styles?.dataFontScale || 1} onChange={e => updateStyles(selectedId!, { dataFontScale: parseFloat(e.target.value) })} className="w-full accent-[#002d72]" />
               </div>
-              
-              <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                    <span className="text-xl font-bold text-slate-600">גודל טקסט ראשי</span>
-                    <span className="text-xl font-extrabold text-[#002d72]">{selectedSection.styles?.dataFontScale}</span>
-                </div>
-                <input type="range" min="0.5" max="5" step="0.1" value={selectedSection.styles?.dataFontScale || 1} onChange={e => updateStyles(selectedId!, { dataFontScale: parseFloat(e.target.value) })} className="w-full h-3 bg-blue-100 rounded-lg accent-[#002d72] cursor-pointer" />
+              <div className="space-y-4">
+                <div className="flex justify-between text-[11px] font-bold"><span>פונט כותרות</span><span>{selectedSection.styles?.fontScale}x</span></div>
+                <input type="range" min="0.5" max="2.5" step="0.1" value={selectedSection.styles?.fontScale || 1} onChange={e => updateStyles(selectedId!, { fontScale: parseFloat(e.target.value) })} className="w-full accent-[#002d72]" />
               </div>
             </div>
 
-            {/* Content Properties */}
-            <div className="space-y-10">
-              {selectedSection.type === 'date_picker' ? (
-                <div className="space-y-8">
-                    <div className="space-y-4">
-                        <label className="text-xl font-extrabold text-[#002d72] block px-2 italic">תווית התאריך</label>
-                        <input 
-                            type="text" 
-                            value={(selectedSection as DatePickerSection).label} 
-                            onChange={e => updateSection(selectedId!, { label: e.target.value })} 
-                            className="w-full p-6 bg-slate-50 border rounded-2xl font-bold text-lg outline-none focus:border-[#002d72]"
-                        />
-                    </div>
-                    <div className="space-y-4">
-                        <label className="text-xl font-extrabold text-[#002d72] block px-2 italic">בחירת תאריך</label>
-                        <input 
-                            type="date" 
-                            value={(selectedSection as DatePickerSection).date} 
-                            onChange={e => updateSection(selectedId!, { date: e.target.value })} 
-                            className="w-full p-6 bg-slate-50 border rounded-2xl font-bold text-lg outline-none focus:border-[#002d72]"
-                        />
-                    </div>
+            {/* Layout Controls */}
+            <div className="bg-slate-50 p-6 rounded-3xl space-y-6">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b pb-2">פריסה</p>
+              <div className="flex gap-4">
+                <div className="flex-1 space-y-2">
+                  <span className="text-[10px] font-bold">רוחב (עמודות)</span>
+                  <input type="number" min="1" max="12" value={selectedSection.styles?.colSpan || 12} onChange={e => updateStyles(selectedId!, { colSpan: parseInt(e.target.value) })} className="w-full p-2 border rounded-xl" />
                 </div>
-              ) : selectedSection.type === 'summary_evaluation' ? (
-                <div className="space-y-10">
-                    <div className="space-y-4">
-                        <label className="text-xl font-extrabold text-[#002d72] block px-2 italic">טקסט סקירה (Briefing)</label>
-                        <textarea 
-                            value={(selectedSection as SummaryEvaluationSection).briefingText}
-                            onChange={e => updateSection(selectedId!, { briefingText: e.target.value })}
-                            className="w-full h-48 p-6 bg-slate-50 border-2 rounded-[1.5rem] font-bold text-lg outline-none focus:border-[#002d72] focus:bg-white resize-none"
-                        />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-4">
-                            <label className="text-sm font-bold text-slate-400 block px-2">ציון (1-5)</label>
-                            <input 
-                                type="number" min="1" max="5"
-                                value={(selectedSection as SummaryEvaluationSection).score}
-                                onChange={e => updateSection(selectedId!, { score: parseInt(e.target.value) })}
-                                className="w-full p-5 bg-slate-50 border rounded-2xl font-black text-3xl text-rose-500 outline-none"
-                            />
-                        </div>
-                        <div className="space-y-4">
-                            <label className="text-sm font-bold text-slate-400 block px-2">תווית ציון</label>
-                            <input 
-                                type="text"
-                                value={(selectedSection as SummaryEvaluationSection).scoreLabel}
-                                onChange={e => updateSection(selectedId!, { scoreLabel: e.target.value })}
-                                className="w-full p-5 bg-slate-50 border rounded-2xl font-bold outline-none"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="space-y-6">
-                        <div className="flex justify-between items-center">
-                            <label className="text-xl font-extrabold text-emerald-600 block px-2">המלצות הביקורת</label>
-                            <button onClick={() => addListItem(selectedId!, 'recommendations')} className="text-xs bg-emerald-500 text-white px-4 py-2 rounded-full font-bold">+ הוסף</button>
-                        </div>
-                        <div className="space-y-3">
-                            {(selectedSection as SummaryEvaluationSection).recommendations.map((item, idx) => (
-                                <div key={idx} className="flex gap-2">
-                                    <input 
-                                        type="text" 
-                                        value={item}
-                                        onChange={e => handleListItemUpdate(selectedId!, 'recommendations', idx, e.target.value)}
-                                        className="flex-1 p-4 bg-slate-50 border rounded-xl font-bold outline-none focus:border-emerald-500"
-                                    />
-                                    <button onClick={() => removeListItem(selectedId!, 'recommendations', idx)} className="text-rose-500 font-bold px-2">✕</button>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="space-y-6">
-                        <div className="flex justify-between items-center">
-                            <label className="text-xl font-extrabold text-rose-600 block px-2">ליקויים עיקריים</label>
-                            <button onClick={() => addListItem(selectedId!, 'deficiencies')} className="text-xs bg-rose-500 text-white px-4 py-2 rounded-full font-bold">+ הוסף</button>
-                        </div>
-                        <div className="space-y-3">
-                            {(selectedSection as SummaryEvaluationSection).deficiencies.map((item, idx) => (
-                                <div key={idx} className="flex gap-2">
-                                    <input 
-                                        type="text" 
-                                        value={item}
-                                        onChange={e => handleListItemUpdate(selectedId!, 'deficiencies', idx, e.target.value)}
-                                        className="flex-1 p-4 bg-slate-50 border rounded-xl font-bold outline-none focus:border-rose-500"
-                                    />
-                                    <button onClick={() => removeListItem(selectedId!, 'deficiencies', idx)} className="text-rose-500 font-bold px-2">✕</button>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+                <div className="flex-1 space-y-2">
+                  <span className="text-[10px] font-bold">גובה (px)</span>
+                  <input type="number" min="100" max="2000" value={selectedSection.styles?.height || 400} onChange={e => updateStyles(selectedId!, { height: parseInt(e.target.value) })} className="w-full p-2 border rounded-xl" />
                 </div>
-              ) : (
-                <>
-                  <div className="space-y-4">
-                    <label className="text-xl font-extrabold text-[#002d72] block px-2 italic">כותרת האובייקט</label>
-                    <input 
-                      type="text" 
-                      value={selectedSection.title || ''} 
-                      onChange={e => updateSection(selectedId!, { title: e.target.value })} 
-                      placeholder="הזן כותרת..." 
-                      className="w-full p-8 bg-[#f8f9fc] border-2 border-slate-100 rounded-3xl font-extrabold text-2xl text-[#002d72] outline-none focus:border-[#002d72] focus:bg-white transition-all shadow-inner" 
+              </div>
+            </div>
+
+            {/* Content Controls */}
+            <div className="space-y-8">
+              {selectedSection.type === 'data_chart' && (
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-slate-400 uppercase">סוג תצוגה</label>
+                    <div className="flex bg-slate-100 p-1 rounded-2xl gap-1">
+                      {CHART_KINDS.map(k => (
+                        <button 
+                          key={k.id}
+                          onClick={() => updateSection(selectedId!, { chartKind: k.id as any })}
+                          className={`flex-1 flex flex-col items-center py-2 rounded-xl transition-all ${
+                            (selectedSection as DataChartSection).chartKind === k.id 
+                            ? 'bg-white text-[#002d72] shadow-sm' 
+                            : 'text-slate-400 hover:text-slate-600'
+                          }`}
+                        >
+                          <span className="text-xl">{k.icon}</span>
+                          <span className="text-[9px] font-bold mt-1">{k.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-slate-400 uppercase">כותרת הגרף</label>
+                    <input type="text" value={selectedSection.title || ''} onChange={e => updateSection(selectedId!, { title: e.target.value })} className="w-full p-4 border rounded-2xl font-bold" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-slate-400 uppercase">נתונים (הדבק מאקסל)</label>
+                    <textarea 
+                      value={pasteBuffer} 
+                      onPaste={(e) => handleDataPaste(e.clipboardData.getData('text'), selectedId!)}
+                      onChange={e => { setPasteBuffer(e.target.value); handleDataPaste(e.target.value, selectedId!); }}
+                      placeholder="הדבק כאן טבלה..."
+                      className="w-full h-48 p-4 font-mono text-[10px] border-2 rounded-2xl bg-slate-900 text-emerald-400 shadow-inner"
+                      dir="ltr"
                     />
                   </div>
+                </div>
+              )}
 
-                  {selectedSection.type === 'kpi' && (
-                    <div className="space-y-6">
-                        <label className="text-xl font-extrabold text-[#002d72] block px-2 italic">עריכת מדדי KPI</label>
-                        <div className="space-y-4">
-                            {(selectedSection as KPISection).metrics.map((m, idx) => (
-                                <div key={idx} className="bg-white border-2 border-slate-100 p-8 rounded-[2rem] shadow-sm space-y-6 relative group">
-                                    <button 
-                                        onClick={() => removeKPIMetric(selectedId!, idx)}
-                                        className="absolute top-4 left-4 text-rose-500 hover:text-rose-700 font-bold p-2"
-                                    >
-                                        מחק מדד
-                                    </button>
-                                    <div className="space-y-4">
-                                        <div>
-                                            <label className="text-sm font-bold text-slate-400 mb-1 block">שם המדד (Label)</label>
-                                            <input 
-                                                type="text" 
-                                                value={m.label} 
-                                                onChange={e => updateKPIMetric(selectedId!, idx, { label: e.target.value })}
-                                                className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-lg focus:bg-white outline-none focus:border-[#002d72]"
-                                            />
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="text-sm font-bold text-slate-400 mb-1 block">ערך (Value)</label>
-                                                <input 
-                                                    type="text" 
-                                                    value={m.value} 
-                                                    onChange={e => updateKPIMetric(selectedId!, idx, { value: e.target.value })}
-                                                    className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-extrabold text-2xl text-[#002d72] focus:bg-white outline-none focus:border-[#002d72]"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="text-sm font-bold text-slate-400 mb-1 block">שינוי (Delta)</label>
-                                                <input 
-                                                    type="text" 
-                                                    value={m.delta} 
-                                                    onChange={e => updateKPIMetric(selectedId!, idx, { delta: e.target.value })}
-                                                    className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-xl text-emerald-600 focus:bg-white outline-none focus:border-[#002d72]"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                            <button 
-                                onClick={() => addKPIMetric(selectedId!)}
-                                className="w-full py-6 border-4 border-dashed border-slate-200 rounded-[2rem] text-slate-400 font-extrabold hover:border-[#002d72] hover:text-[#002d72] transition-all"
-                            >
-                                + הוסף מדד KPI חדש
-                            </button>
-                        </div>
+              {selectedSection.type === 'kpi' && (
+                <div className="space-y-4">
+                  <div className="flex justify-between border-b pb-2"><label className="text-xs font-black text-blue-600 uppercase">מדדי KPI</label>
+                  <button onClick={() => updateSection(selectedId!, { metrics: [...(selectedSection as KPISection).metrics, { label: 'חדש', value: '0', delta: '+0%' }] })} className="bg-blue-600 text-white px-3 py-1 rounded text-xs">+ מדד</button></div>
+                  {(selectedSection as KPISection).metrics.map((m, idx) => (
+                    <div key={idx} className="p-4 border-2 rounded-2xl space-y-2 relative bg-white shadow-sm">
+                      <button onClick={() => updateSection(selectedId!, { metrics: (selectedSection as KPISection).metrics.filter((_, i) => i !== idx) })} className="absolute top-2 left-2 text-rose-500">✕</button>
+                      <input type="text" value={m.label} onChange={e => updateKPIMetric(selectedId!, idx, { label: e.target.value })} className="w-full font-bold border-b p-1 text-sm outline-none" placeholder="שם המדד" />
+                      <div className="flex gap-2">
+                        <input type="text" value={m.value} onChange={e => updateKPIMetric(selectedId!, idx, { value: e.target.value })} className="w-2/3 text-blue-600 font-black p-1 text-xl" placeholder="ערך" />
+                        <input type="text" value={m.delta || ''} onChange={e => updateKPIMetric(selectedId!, idx, { delta: e.target.value })} className="w-1/3 text-slate-400 font-bold text-xs text-center border-r" placeholder="+0% או -0%" title="השתמש ב-+ לסימון ירוק ושיפור, וב-- לסימון אדום וירידה" />
+                      </div>
                     </div>
-                  )}
+                  ))}
+                </div>
+              )}
 
-                  {selectedSection.type === 'pasted_graphic' && (
-                    <div className="space-y-6">
-                        <label className="text-xl font-extrabold text-[#002d72] block px-2 italic">העלאת תמונה / גרפיקה</label>
-                        <div 
-                            className="w-full h-72 border-4 border-dashed border-slate-200 rounded-[2.5rem] flex flex-col items-center justify-center text-slate-400 hover:border-[#002d72] hover:text-[#002d72] transition-all cursor-pointer relative overflow-hidden bg-slate-50 group"
-                            onPaste={handleImagePaste}
-                            onClick={() => {
-                                const input = document.createElement('input');
-                                input.type = 'file';
-                                input.accept = 'image/*';
-                                input.onchange = (e) => {
-                                    const file = (e.target as HTMLInputElement).files?.[0];
-                                    if (file) {
-                                        const reader = new FileReader();
-                                        reader.onload = (ev) => {
-                                            updateSection(selectedId!, { src: ev.target?.result as string } as any);
-                                        };
-                                        reader.readAsDataURL(file);
-                                    }
-                                };
-                                input.click();
-                            }}
-                        >
-                            {(selectedSection as PastedGraphicSection).src ? (
-                                <img src={(selectedSection as PastedGraphicSection).src} className="absolute inset-0 w-full h-full object-contain p-4" alt="תצוגה מקדימה" />
-                            ) : (
-                                <div className="text-center p-6">
-                                    <span className="text-6xl mb-4 block">🖼️</span>
-                                    <p className="font-bold text-xl">לחץ לבחירת קובץ או הדבק (Paste) תמונה כאן</p>
-                                </div>
-                            )}
-                            <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                               <span className="bg-white/90 text-[#002d72] px-6 py-2 rounded-full font-bold shadow-xl">החלף תמונה</span>
-                            </div>
-                        </div>
-                        <div className="space-y-4">
-                            <label className="text-sm font-bold text-slate-400 block px-2">כיתוב לתמונה (Caption)</label>
-                            <input 
-                                type="text" 
-                                value={(selectedSection as PastedGraphicSection).caption || ''} 
-                                onChange={e => updateSection(selectedId!, { caption: e.target.value } as any)} 
-                                placeholder="הוסף כיתוב למטה..." 
-                                className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold focus:bg-white outline-none focus:border-[#002d72]"
-                            />
-                        </div>
+              {selectedSection.type === 'summary_evaluation' && (
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-slate-400 uppercase">טקסט סיכום</label>
+                    <textarea value={(selectedSection as SummaryEvaluationSection).briefingText} onChange={e => updateSection(selectedId!, { briefingText: e.target.value })} className="w-full h-32 p-4 border rounded-2xl font-bold bg-slate-50" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-xs font-black text-rose-500 uppercase">ציון (1-5)</label>
+                      <input type="number" min="1" max="5" value={(selectedSection as SummaryEvaluationSection).score} onChange={e => updateSection(selectedId!, { score: parseInt(e.target.value) })} className="w-full p-3 border rounded-xl font-bold text-center" />
                     </div>
-                  )}
-
-                  {selectedSection.type === 'data_chart' && (
-                    <div className="space-y-6">
-                        <label className="text-xl font-extrabold text-[#002d72] block px-2 italic">סוג תצוגה גרפית</label>
-                        <div className="grid grid-cols-3 gap-4">
-                            {['bar', 'line', 'area', 'pie', 'donut'].map((kind) => {
-                                const chart = selectedSection as DataChartSection;
-                                const isMulti = (chart.seriesKeys?.length || 0) > 1;
-                                const isPie = kind === 'pie' || kind === 'donut';
-                                const isDisabled = isMulti && isPie;
-
-                                return (
-                                    <button 
-                                        key={kind} 
-                                        disabled={isDisabled}
-                                        onClick={() => updateSection(selectedId!, { chartKind: kind as any })} 
-                                        className={`py-6 rounded-3xl text-lg font-bold transition-all flex flex-col items-center justify-center border-2 ${
-                                            chart.chartKind === kind 
-                                            ? 'bg-[#002d72] text-white border-[#002d72] shadow-lg' 
-                                            : isDisabled 
-                                                ? 'bg-slate-50 text-slate-200 border-slate-100 cursor-not-allowed opacity-50' 
-                                                : 'bg-white text-slate-400 border-slate-100 hover:border-slate-300'
-                                        }`}
-                                    >
-                                        <span className="text-3xl mb-2">
-                                            {kind === 'bar' ? '📊' : kind === 'line' ? '📈' : kind === 'area' ? '🌊' : '🥧'}
-                                        </span>
-                                        <span className="capitalize">{kind}</span>
-                                        {isDisabled && <span className="text-[10px] mt-1 opacity-60">לא לריבוי סדרות</span>}
-                                    </button>
-                                );
-                            })}
-                        </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-black text-rose-500 uppercase">תווית ציון</label>
+                      <input type="text" value={(selectedSection as SummaryEvaluationSection).scoreLabel} onChange={e => updateSection(selectedId!, { scoreLabel: e.target.value })} className="w-full p-3 border rounded-xl font-bold" />
                     </div>
-                  )}
+                  </div>
+                  <div className="space-y-4">
+                    <label className="text-xs font-black text-slate-400 uppercase">ליקויים</label>
+                    <button onClick={() => updateSection(selectedId!, { deficiencies: [...(selectedSection as SummaryEvaluationSection).deficiencies, 'ליקוי חדש'] })} className="block w-full py-2 bg-rose-50 text-rose-600 rounded-xl font-bold text-xs mb-2">הוסף ליקוי</button>
+                    {(selectedSection as SummaryEvaluationSection).deficiencies.map((d, i) => (
+                      <div key={i} className="flex gap-2">
+                        <input type="text" value={d} onChange={e => {
+                          const newList = [...(selectedSection as SummaryEvaluationSection).deficiencies];
+                          newList[i] = e.target.value;
+                          updateSection(selectedId!, { deficiencies: newList });
+                        }} className="flex-1 p-2 border rounded-lg text-sm" />
+                        <button onClick={() => updateSection(selectedId!, { deficiencies: (selectedSection as SummaryEvaluationSection).deficiencies.filter((_, idx) => idx !== i) })} className="text-rose-500">✕</button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-                  {(selectedSection.type === 'data_chart' || selectedSection.type === 'table') && (
-                    <div className="space-y-5">
-                        <label className="text-xl font-extrabold text-[#002d72] block px-2 italic">עריכת נתונים (העתק מאקסל)</label>
-                        <textarea 
-                            value={pasteBuffer} 
-                            onPaste={(e) => { const text = e.clipboardData.getData('text'); handleDataPaste(text, selectedId!); }} 
-                            onChange={e => { setPasteBuffer(e.target.value); handleDataPaste(e.target.value, selectedId!); }} 
-                            className="w-full h-96 p-8 bg-[#001b44] text-emerald-400 border-2 border-slate-800 rounded-[2.5rem] text-lg font-mono focus:border-emerald-500 outline-none ltr text-left leading-relaxed shadow-2xl transition-all" 
-                            placeholder="הדבק כאן טבלה מאקסל..."
-                            dir="ltr" 
-                        />
+              {selectedSection.type === 'date_picker' && (
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-slate-400 uppercase">תווית התאריך</label>
+                    <input 
+                      type="text" 
+                      value={(selectedSection as DatePickerSection).label} 
+                      onChange={e => updateSection(selectedId!, { label: e.target.value })} 
+                      className="w-full p-4 border-2 rounded-2xl font-bold bg-white focus:border-[#002d72] outline-none transition-all" 
+                      placeholder="למשל: תאריך הפקת הדו״ח"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-slate-400 uppercase">בחירת תאריך</label>
+                    <div className="flex gap-2">
+                      <input 
+                        type="date" 
+                        value={(selectedSection as DatePickerSection).date} 
+                        onChange={e => updateSection(selectedId!, { date: e.target.value })} 
+                        className="flex-1 p-4 border-2 rounded-2xl font-bold bg-white focus:border-[#002d72] outline-none transition-all" 
+                      />
+                      <button 
+                        onClick={() => updateSection(selectedId!, { date: new Date().toISOString().split('T')[0] })}
+                        className="px-4 bg-slate-100 hover:bg-slate-200 rounded-2xl font-bold text-xs text-[#002d72] transition-all"
+                      >
+                        היום
+                      </button>
                     </div>
-                  )}
+                  </div>
+                </div>
+              )}
 
-                  {selectedSection.type === 'text' && (
-                    <div className="space-y-4">
-                        <label className="text-xl font-extrabold text-[#002d72] block px-2 italic">תוכן הטקסט</label>
-                        <textarea 
-                            value={(selectedSection as any).content} 
-                            onChange={e => updateSection(selectedId!, { content: e.target.value } as any)} 
-                            className="w-full h-80 p-8 bg-[#f8f9fc] border-2 border-slate-100 rounded-[2.5rem] text-2xl font-bold text-[#002d72] focus:bg-white focus:border-[#002d72] outline-none transition-all shadow-inner leading-relaxed" 
-                            placeholder={'הזן את הטקסט כאן...'} 
-                        />
-                    </div>
-                  )}
-                </>
+              {selectedSection.type === 'text' && (
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-400 uppercase">תוכן הטקסט</label>
+                  <textarea value={(selectedSection as TextSection).content} onChange={e => updateSection(selectedId!, { content: e.target.value })} className="w-full h-48 p-4 border rounded-2xl font-bold" />
+                </div>
               )}
             </div>
 
-            <button 
-                onClick={() => { if(confirm('למחוק את האובייקט מהדו"ח?')) { onUpdate({...report, sections: report.sections.filter(s => s.id !== selectedId)}); onSelect(null); } }} 
-                className="w-full py-8 bg-rose-50 text-rose-600 font-extrabold text-xl uppercase tracking-widest hover:bg-rose-600 hover:text-white rounded-[2.5rem] border-2 border-rose-100 transition-all shadow-md"
-            >
-                ✕ מחק אובייקט זה
-            </button>
+            <button onClick={() => { if(confirm('למחוק לצמיתות?')) { onUpdate({...report, sections: report.sections.filter(s => s.id !== selectedId)}); onSelect(null); } }} className="w-full py-6 bg-rose-50 text-rose-600 font-black rounded-3xl border-2 border-rose-100 hover:bg-rose-600 hover:text-white transition-all shadow-sm">מחיקה סופית ✕</button>
           </div>
         </div>
       )}

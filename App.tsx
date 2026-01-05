@@ -8,7 +8,6 @@ import { SectionPreview } from './components/SectionPreview';
 const STORAGE_KEY = 'offline_report_data';
 
 const App: React.FC = () => {
-  // Persistence logic: Load from localStorage or use initial
   const [report, setReport] = useState<Report>(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
@@ -29,7 +28,6 @@ const App: React.FC = () => {
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('saved');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Auto-save effect
   useEffect(() => {
     setSaveStatus('saving');
     const timer = setTimeout(() => {
@@ -38,6 +36,13 @@ const App: React.FC = () => {
     }, 500);
     return () => clearTimeout(timer);
   }, [report]);
+
+  const handleUpdateSectionStyles = (id: string, styleUpdates: any) => {
+    setReport(prev => ({
+      ...prev,
+      sections: prev.sections.map(s => s.id === id ? { ...s, styles: { ...s.styles, ...styleUpdates } } : s)
+    }));
+  };
 
   const handleExport = () => {
     const data = JSON.stringify(report, null, 2);
@@ -115,7 +120,6 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {/* Sidebar - Local UI */}
       <div className={`${effectiveSidebarOpen ? 'w-[450px]' : 'w-0'} transition-all duration-500 border-l bg-white shadow-2xl flex flex-col overflow-hidden shrink-0 no-print`}>
         <EditorPanel 
           report={report} 
@@ -128,7 +132,6 @@ const App: React.FC = () => {
       </div>
 
       <div className="flex-1 flex flex-col min-w-0 bg-[#f4f7fa]">
-        {/* Header - Desktop Style */}
         <header className="h-20 bg-white border-b flex items-center justify-between px-10 z-50 sticky top-0 shadow-sm no-print">
           <div className="flex items-center gap-6">
             {editMode && (
@@ -189,7 +192,7 @@ const App: React.FC = () => {
               report.sections.map((section) => (
                 <div 
                   key={section.id} 
-                  draggable={editMode}
+                  draggable={editMode && !selectedId}
                   onDragStart={() => handleDragStart(section.id)}
                   onDragOver={(e) => handleDragOver(e, section.id)}
                   onDragEnd={handleDragEnd}
@@ -201,6 +204,7 @@ const App: React.FC = () => {
                     isSelected={editMode && selectedId === section.id}
                     onDelete={editMode ? (id) => setReport(p => ({...p, sections: p.sections.filter(s => s.id !== id)})) : undefined as any} 
                     onSelect={editMode ? setSelectedId : undefined as any}
+                    onUpdateStyles={handleUpdateSectionStyles}
                   />
                 </div>
               ))

@@ -1,5 +1,5 @@
 
-export type SectionType = "text" | "pasted_graphic" | "data_chart" | "table" | "kpi" | "summary_evaluation" | "date_picker";
+export type SectionType = "text" | "pasted_graphic" | "data_chart" | "table" | "kpi" | "summary_evaluation" | "date_picker" | "anomaly";
 
 export interface SectionStyles {
     colSpan?: number; // 1-12 columns in grid
@@ -65,6 +65,7 @@ export interface SummaryEvaluationSection extends SectionBase {
     briefingText: string;
     score: number;
     scoreLabel: string;
+    footerLabel?: string;
     recommendations: string[];
     deficiencies: string[];
 }
@@ -76,7 +77,24 @@ export interface DatePickerSection extends SectionBase {
     icon?: string;
 }
 
-export type Section = TextSection | PastedGraphicSection | DataChartSection | TableSection | KPISection | SummaryEvaluationSection | DatePickerSection;
+export interface AnomalyItem {
+    id: string;
+    title: string;
+    department: string;
+    status: string;
+    riskLevel: number; // 1-5 scale
+    riskAnalysis: string;
+    detailedReport: string;
+    internalRef: string;
+    protocolStatus: string;
+}
+
+export interface AnomalySection extends SectionBase {
+    type: "anomaly";
+    items: AnomalyItem[];
+}
+
+export type Section = TextSection | PastedGraphicSection | DataChartSection | TableSection | KPISection | SummaryEvaluationSection | DatePickerSection | AnomalySection;
 
 export type Report = {
     sections: Section[];
