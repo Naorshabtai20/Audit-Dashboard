@@ -109,64 +109,69 @@ export const SectionPreview: React.FC<{
                 : 'bg-white rounded-[100px] border border-blue-50/50 shadow-md hover:shadow-lg cursor-pointer'
             }`}
           >
-            {/* Closed State Header */}
+            {/* Header (Matching Image 1) */}
             <div className="p-8 pr-12 flex items-center justify-between relative z-10 min-h-[140px]">
+                {/* Left Side: Red Bars */}
                 <div className="flex flex-col items-center gap-2 shrink-0">
                     <div className="flex gap-1.5">
                         {[1,2,3,4,5].map(dot => (
-                            <div key={dot} className={`w-2.5 h-10 rounded-full transition-all ${dot <= item.riskLevel ? 'bg-rose-500 shadow-sm' : 'bg-slate-100'}`}></div>
+                            <div key={dot} className={`w-2.5 h-10 rounded-full transition-all ${dot <= item.riskLevel ? 'bg-rose-500' : 'bg-slate-100'}`}></div>
                         ))}
                     </div>
                     <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">CONTRACT DETAILS</span>
                 </div>
 
-                <div className="flex-1 flex flex-col text-right px-10">
-                    <h3 className="text-2xl font-black text-[#0f172a] mb-2">{item.title}</h3>
+                {/* Center Part: Information */}
+                <div className="flex flex-col text-right flex-1 px-12">
+                    <h3 className="text-2xl font-black text-[#0f172a] tracking-tight leading-tight mb-4">{item.title}</h3>
                     <div className="flex items-center justify-end gap-6">
                         <span className="text-xs font-bold text-indigo-500 uppercase tracking-widest">סטטוס: {item.status}</span>
                         <div className="bg-slate-50 px-4 py-1.5 rounded-full border border-slate-100 flex items-center gap-3">
-                            <span className="text-[9px] font-black text-slate-400 uppercase">חטיבה:</span>
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">חטיבה:</span>
                             <span className="text-xs font-bold text-slate-700">{item.department}</span>
                         </div>
                     </div>
                 </div>
 
-                <div className="text-[6.5rem] font-black text-slate-50/70 italic tracking-tighter select-none pointer-events-none pr-4 leading-none">
+                {/* Right Side: Large Ghost Number */}
+                <div className="text-[6rem] font-black text-slate-50/70 italic tracking-tighter select-none pointer-events-none pr-4 leading-none">
                     {indexStr}
                 </div>
             </div>
 
-            {/* Expanded State Content */}
+            {/* Open View (Matching Image 2) */}
             {isExpanded && (
                 <div className="px-12 pb-14 pt-4 animate-in slide-in-from-top-4 duration-500 bg-white relative z-20">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 pt-10 border-t-2 border-slate-50">
-                        {/* Right: Technical Details */}
+                        {/* Right Column: Detailed Report */}
                         <div className="space-y-6 text-right order-last lg:order-first">
-                             <div className="space-y-4">
-                                <span className="text-[11px] font-black text-indigo-500 uppercase tracking-[0.5em] block">DETAILED ANOMALY REPORT</span>
-                                <p className="text-slate-800 text-2xl font-bold leading-relaxed">
-                                    {item.detailedReport || 'אין פירוט טכני זמין במערכת עבור ממצא זה.'}
+                             <div className="space-y-6">
+                                <span className="text-[12px] font-black text-indigo-500 uppercase tracking-[0.6em] block">DETAILED ANOMALY REPORT</span>
+                                <p className="text-slate-800 text-2xl font-bold leading-relaxed tracking-tight">
+                                    {item.detailedReport || 'אין פירוט טכני זמין עבור ממצא זה.'}
                                 </p>
                              </div>
                         </div>
 
-                        {/* Left: Risks & Protocol */}
-                        <div className="space-y-8 flex flex-col">
-                            <div className="bg-[#f8fbff] p-10 rounded-[2.5rem] space-y-4 border border-blue-50/50 shadow-inner">
+                        {/* Left Column: Analysis & Meta */}
+                        <div className="space-y-10 flex flex-col">
+                            {/* Analysis Box */}
+                            <div className="bg-[#f8fbff] p-10 rounded-[3rem] space-y-4 border border-blue-50/50 shadow-inner">
                                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] block text-right">RISK FACTOR ANALYSIS</span>
                                 <p className="text-slate-600 font-bold text-lg text-right leading-relaxed">
-                                    הממצא זוהה ברמת חומרה <span className="text-rose-500 font-black">{item.riskLevel}/5</span>. {item.riskAnalysis || 'נדרשת בחינה מיידית של תהליכי הבקרה בחטיבה הרלוונטית.'}
+                                    הממצא זוהה ברמת חומרה <span className="text-rose-500 font-black">{item.riskLevel}/5</span>. {item.riskAnalysis || 'נדרשת בחינה מיידית של תהליכי הבקרה.'}
                                 </p>
                             </div>
                             
+                            {/* Meta Bubbles */}
                             <div className="grid grid-cols-2 gap-6">
-                                <div className="bg-slate-50 p-6 rounded-[2rem] text-center border border-slate-100 flex flex-col items-center justify-center">
-                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2">INTERNAL REFERENCE</span>
-                                    <span className="font-mono text-slate-800 font-black text-lg">{item.internalRef || 'SEC_LOG_x100'}</span>
+                                <div className="bg-slate-50 p-8 rounded-[2rem] text-center border border-slate-100 flex flex-col items-center justify-center">
+                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3">INTERNAL REFERENCE</span>
+                                    <span className="font-mono text-slate-800 font-black text-lg">{item.internalRef || 'REF-X00'}</span>
                                 </div>
-                                <div className="bg-indigo-50 p-6 rounded-[2rem] text-center border border-indigo-100 flex flex-col items-center justify-center">
-                                    <span className="text-[9px] font-black text-indigo-500 uppercase tracking-widest block mb-2">PROTOCOL STATUS</span>
-                                    <span className="text-indigo-600 font-black text-2xl uppercase tracking-tighter">{item.status || 'בטיפול'}</span>
+                                <div className="bg-indigo-50 p-8 rounded-[2rem] text-center border border-indigo-100 flex flex-col items-center justify-center">
+                                    <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest block mb-3">PROTOCOL STATUS</span>
+                                    <span className="text-indigo-600 font-black text-3xl uppercase tracking-tighter">{item.status || 'בטיפול'}</span>
                                 </div>
                             </div>
                         </div>
@@ -271,8 +276,8 @@ export const SectionPreview: React.FC<{
         isSelected={isSelected} 
         onDelete={onDelete ? () => onDelete(section.id) : undefined} 
         onSelect={onSelect ? () => onSelect(section.id) : undefined} 
-        noPadding={section.type === 'summary_evaluation' || section.type === 'kpi' || section.type === 'anomaly'}
-        isDynamicHeight={section.type === 'date_picker' || section.type === 'anomaly'}
+        noPadding={section.type === 'summary_evaluation' || section.type === 'kpi' || section.type === 'anomaly' || section.type === 'pasted_graphic'}
+        isDynamicHeight={section.type === 'date_picker' || section.type === 'anomaly' || section.type === 'pasted_graphic'}
         pill={section.type === 'date_picker'}
         className={section.type === 'summary_evaluation' ? 'bg-[#f8fbff]' : ''}
     >
@@ -280,13 +285,33 @@ export const SectionPreview: React.FC<{
           renderSummaryEvaluation(section as SummaryEvaluationSection)
         ) : (
           <div className="flex flex-col h-full w-full">
-            {section.title && !['date_picker', 'anomaly'].includes(section.type) && (
+            {section.title && !['date_picker', 'anomaly', 'pasted_graphic'].includes(section.type) && (
               <h2 className="mb-8 tracking-tighter leading-none border-r-8 border-[#002d72] pr-6 font-black shrink-0 text-right" style={{ color: textColor, fontSize: `${1.7 * fontScale}rem` }}>{section.title}</h2>
             )}
             
             {section.type === 'kpi' && renderKPI(section as KPISection)}
             {section.type === 'data_chart' && renderChart(section as DataChartSection)}
             {section.type === 'anomaly' && renderAnomaly(section as AnomalySection)}
+
+            {section.type === 'pasted_graphic' && (
+              <div className="w-full h-full flex flex-col items-center justify-center p-0 relative group">
+                {(section as PastedGraphicSection).src ? (
+                  <>
+                    <img src={(section as PastedGraphicSection).src} className="w-full h-full object-contain rounded-[2.5rem]" alt="Graph" />
+                    {(section as PastedGraphicSection).caption && (
+                      <div className="absolute bottom-6 bg-white/90 backdrop-blur-md px-6 py-2 rounded-full border border-slate-100 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="text-xs font-black text-[#002d72]">{(section as PastedGraphicSection).caption}</span>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center justify-center text-slate-200 gap-4 py-20">
+                    <span className="text-8xl">🖼️</span>
+                    <p className="font-black text-lg">אין תמונה מוצגת. ערוך כדי להוסיף.</p>
+                  </div>
+                )}
+              </div>
+            )}
 
             {section.type === 'table' && (
               <div className="overflow-x-auto rounded-[2.5rem] border border-slate-100 shadow-sm bg-white flex-1 custom-scrollbar">
