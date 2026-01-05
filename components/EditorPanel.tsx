@@ -273,17 +273,35 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
                       <input type="text" value={(selectedSection as SummaryEvaluationSection).scoreLabel} onChange={e => updateSection(selectedId!, { scoreLabel: e.target.value })} className="w-full p-3 border rounded-xl font-bold" />
                     </div>
                   </div>
+                  
+                  {/* Deficiencies Management */}
                   <div className="space-y-4">
-                    <label className="text-xs font-black text-slate-400 uppercase">ליקויים</label>
-                    <button onClick={() => updateSection(selectedId!, { deficiencies: [...(selectedSection as SummaryEvaluationSection).deficiencies, 'ליקוי חדש'] })} className="block w-full py-2 bg-rose-50 text-rose-600 rounded-xl font-bold text-xs mb-2">הוסף ליקוי</button>
+                    <label className="text-xs font-black text-rose-500 uppercase">ליקויים</label>
+                    <button onClick={() => updateSection(selectedId!, { deficiencies: [...(selectedSection as SummaryEvaluationSection).deficiencies, 'ליקוי חדש'] })} className="block w-full py-2 bg-rose-50 text-rose-600 rounded-xl font-bold text-xs mb-2 transition-all hover:bg-rose-100">הוסף ליקוי +</button>
                     {(selectedSection as SummaryEvaluationSection).deficiencies.map((d, i) => (
-                      <div key={i} className="flex gap-2">
+                      <div key={i} className="flex gap-2 group">
                         <input type="text" value={d} onChange={e => {
                           const newList = [...(selectedSection as SummaryEvaluationSection).deficiencies];
                           newList[i] = e.target.value;
                           updateSection(selectedId!, { deficiencies: newList });
-                        }} className="flex-1 p-2 border rounded-lg text-sm" />
-                        <button onClick={() => updateSection(selectedId!, { deficiencies: (selectedSection as SummaryEvaluationSection).deficiencies.filter((_, idx) => idx !== i) })} className="text-rose-500">✕</button>
+                        }} className="flex-1 p-2 border rounded-lg text-sm bg-slate-50/50" />
+                        <button onClick={() => updateSection(selectedId!, { deficiencies: (selectedSection as SummaryEvaluationSection).deficiencies.filter((_, idx) => idx !== i) })} className="text-rose-300 hover:text-rose-600 transition-colors px-1">✕</button>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Recommendations Management */}
+                  <div className="space-y-4 pt-4 border-t border-slate-100">
+                    <label className="text-xs font-black text-emerald-600 uppercase">המלצות הביקורת</label>
+                    <button onClick={() => updateSection(selectedId!, { recommendations: [...(selectedSection as SummaryEvaluationSection).recommendations, 'המלצה חדשה'] })} className="block w-full py-2 bg-emerald-50 text-emerald-600 rounded-xl font-bold text-xs mb-2 transition-all hover:bg-emerald-100">הוסף המלצה +</button>
+                    {(selectedSection as SummaryEvaluationSection).recommendations.map((r, i) => (
+                      <div key={i} className="flex gap-2 group">
+                        <input type="text" value={r} onChange={e => {
+                          const newList = [...(selectedSection as SummaryEvaluationSection).recommendations];
+                          newList[i] = e.target.value;
+                          updateSection(selectedId!, { recommendations: newList });
+                        }} className="flex-1 p-2 border rounded-lg text-sm bg-slate-50/50" />
+                        <button onClick={() => updateSection(selectedId!, { recommendations: (selectedSection as SummaryEvaluationSection).recommendations.filter((_, idx) => idx !== i) })} className="text-rose-300 hover:text-rose-600 transition-colors px-1">✕</button>
                       </div>
                     ))}
                   </div>
