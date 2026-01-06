@@ -1,7 +1,25 @@
 
 export type SectionType = "text" | "pasted_graphic" | "data_chart" | "table" | "kpi" | "summary_evaluation" | "date_picker" | "anomaly";
 
-export interface SectionStyles {
+export interface SectionTypeProperties
+{
+    isHeightResponsive?: boolean;
+    // Add more static properties here as needed
+}
+
+export const SectionTypePropertiesMap: Record<SectionType, SectionTypeProperties> = {
+    text: { isHeightResponsive: true },
+    pasted_graphic: { isHeightResponsive: false },
+    data_chart: { isHeightResponsive: false },
+    table: { isHeightResponsive: false },
+    kpi: { isHeightResponsive: true },
+    summary_evaluation: { isHeightResponsive: false },
+    date_picker: { isHeightResponsive: false },
+    anomaly: { isHeightResponsive: false },
+};
+
+export interface SectionStyles
+{
     colSpan?: number; // 1-12 columns in grid
     height?: number; // explicit height in pixels
     fontScale?: number; // 0.5-6.0 (Headers/Titles)
@@ -15,7 +33,8 @@ export interface SectionStyles {
     fontWeight?: string;
 }
 
-export interface SectionBase {
+export interface SectionBase
+{
     id: string;
     type: SectionType;
     title?: string;
@@ -23,18 +42,21 @@ export interface SectionBase {
     styles?: SectionStyles;
 }
 
-export interface TextSection extends SectionBase {
+export interface TextSection extends SectionBase
+{
     type: "text";
     content: string;
 }
 
-export interface PastedGraphicSection extends SectionBase {
+export interface PastedGraphicSection extends SectionBase
+{
     type: "pasted_graphic";
     src: string;
     caption?: string;
 }
 
-export interface DataChartSection extends SectionBase {
+export interface DataChartSection extends SectionBase
+{
     type: "data_chart";
     chartKind: "line" | "bar" | "area" | "pie" | "donut" | "radar";
     data: Array<Record<string, any>>;
@@ -42,25 +64,29 @@ export interface DataChartSection extends SectionBase {
     seriesKeys?: string[];
 }
 
-export interface TableSection extends SectionBase {
+export interface TableSection extends SectionBase
+{
     type: "table";
     headers: string[];
     rows: string[][];
 }
 
-export interface KPIMetric {
+export interface KPIMetric
+{
     label: string;
     value: string | number;
     delta?: string | number;
     trend?: "up" | "down" | "flat";
 }
 
-export interface KPISection extends SectionBase {
+export interface KPISection extends SectionBase
+{
     type: "kpi";
     metrics: KPIMetric[];
 }
 
-export interface SummaryEvaluationSection extends SectionBase {
+export interface SummaryEvaluationSection extends SectionBase
+{
     type: "summary_evaluation";
     briefingText: string;
     score: number;
@@ -70,14 +96,16 @@ export interface SummaryEvaluationSection extends SectionBase {
     deficiencies: string[];
 }
 
-export interface DatePickerSection extends SectionBase {
+export interface DatePickerSection extends SectionBase
+{
     type: "date_picker";
     date: string;
     label: string;
     icon?: string;
 }
 
-export interface AnomalyItem {
+export interface AnomalyItem
+{
     id: string;
     title: string;
     department: string;
@@ -89,7 +117,8 @@ export interface AnomalyItem {
     protocolStatus: string;
 }
 
-export interface AnomalySection extends SectionBase {
+export interface AnomalySection extends SectionBase
+{
     type: "anomaly";
     items: AnomalyItem[];
 }
@@ -98,10 +127,10 @@ export type Section = TextSection | PastedGraphicSection | DataChartSection | Ta
 
 export type ReportTab = {
     title: string; // tab title
-    icon?: string ; // tab icon
+    icon?: string; // tab icon
     subTitles?: string; //sub title under the tab name
     sections: Section[]; // tab content
-} 
+}
 
 export type Report = {
     tabs: ReportTab[];

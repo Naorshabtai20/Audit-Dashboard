@@ -237,7 +237,7 @@ export const SectionPreview: React.FC<{
     );
 
     const renderKPI = (sec: KPISection) => (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full h-full p-2">
+      <div className="flex flex-wrap gap-4 w-full p-2">
         {sec.metrics.map((m, i) =>
         {
           const deltaStr = m.delta?.toString() || '';
@@ -247,12 +247,12 @@ export const SectionPreview: React.FC<{
           const trendIcon = isPositive ? '▲' : (isNegative ? '▼' : '');
 
           return (
-            <div key={i} className="bg-slate-50 p-8 rounded-[2.5rem] text-right shadow-sm border border-slate-100 flex flex-col justify-center transition-all hover:bg-white hover:border-[#002d72]/20 hover:shadow-md">
-              <p className="font-black text-slate-400 uppercase tracking-widest mb-3" style={{ fontSize: `${11 * labelFontScale}px` }}>{m.label}</p>
-              <div className="flex items-baseline justify-between gap-4">
+            <div key={i} className="bg-slate-50 p-4 rounded-[2.5rem] text-right shadow-sm border border-slate-100 flex flex-col justify-center transition-all hover:bg-white hover:border-[#002d72]/20 hover:shadow-md min-w-[150px] flex-1">
+              <p className="font-black text-slate-400 uppercase tracking-widest mb-2 truncate max-w-full text-sm" style={{ fontSize: `${11 * labelFontScale}px` }} title={m.label}>{m.label}</p>
+              <div className="flex items-baseline justify-between gap-2 w-full">
                 <span className="font-black leading-none tracking-tighter" style={{ fontSize: `${2.6 * dataFontScale}rem`, color: textColor }}>{m.value}</span>
                 {m.delta && (
-                  <div className="flex items-center font-black" style={{ fontSize: `${13 * labelFontScale}px`, color: trendColor }}>
+                  <div className="flex items-center font-black text-sm" style={{ fontSize: `${13 * labelFontScale}px`, color: trendColor }}>
                     <span className="ml-1 text-[10px]">{trendIcon}</span>
                     <span>{m.delta}</span>
                   </div>
@@ -331,7 +331,7 @@ export const SectionPreview: React.FC<{
         onDelete={onDelete ? () => onDelete(section.id) : undefined}
         onSelect={onSelect ? () => onSelect(section.id) : undefined}
         noPadding={section.type === 'summary_evaluation' || section.type === 'kpi' || section.type === 'anomaly' || section.type === 'pasted_graphic'}
-        isDynamicHeight={section.type === 'date_picker' || section.type === 'anomaly' || section.type === 'pasted_graphic' || section.type === 'summary_evaluation'}
+        isDynamicHeight={section.type === 'date_picker' || section.type === 'anomaly' || section.type === 'pasted_graphic' || section.type === 'summary_evaluation' || section.type === 'text'}
         pill={section.type === 'date_picker'}
         className={section.type === 'summary_evaluation' ? 'bg-[#f8fbff]' : ''}
       >
@@ -384,7 +384,11 @@ export const SectionPreview: React.FC<{
               </div>
             )}
 
-            {section.type === 'text' && <div className="whitespace-pre-wrap leading-relaxed font-bold text-right text-[#002d72]" style={{ fontSize: `${1.1 * fontScale}rem` }}>{(section as TextSection).content}</div>}
+            {section.type === 'text' && (
+              <div className="whitespace-pre-wrap leading-relaxed font-bold text-right text-[#002d72] flex-1" style={{ fontSize: `${1.1 * fontScale}rem` }}>
+                {(section as TextSection).content}
+              </div>
+            )}
 
             {section.type === 'date_picker' && (
               <div className="flex items-center gap-10 px-12 py-3">
