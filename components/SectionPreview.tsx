@@ -45,7 +45,7 @@ const Card: React.FC<{
             onClick={(e) => { e.stopPropagation(); onDelete(); }}
             className="absolute top-2 right-2 w-6 h-6 bg-rose-500 text-white rounded flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-rose-600 z-[70] shadow-lg border border-white"
           >
-            <span className="text-[10px] font-bold">✕</span>
+            <span className="text-[10px] font-bold">×</span>
           </button>
         )}
 

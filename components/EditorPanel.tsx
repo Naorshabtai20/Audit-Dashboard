@@ -1,15 +1,28 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Section, SectionType, Report, ChartSection, TableSection, KPISection, SectionStyles, SummaryEvaluationSection, DateSection, AnomalySection, AnomalyItem, TextSection, GraphicSection } from '../types';
+import { Section, SectionType, Report, ReportTab, ChartSection, TableSection, KPISection, SectionStyles, SummaryEvaluationSection, DateSection, AnomalySection, AnomalyItem, TextSection, GraphicSection } from '../types';
 
 interface EditorPanelProps
 {
+  // report here represents the active tab payload (sections + tab settings)
   report: any;
   onUpdate: (report: any) => void;
   selectedId: string | null;
   onSelect: (id: string | null) => void;
   onMove: (id: string, direction: 'up' | 'down') => void;
   onCloseSidebar: () => void;
+
+  // Tab management (passed from App) - used to show/add/delete/switch tabs inside the editor
+  tabs?: ReportTab[];
+  activeTabIndex?: number;
+  onAddTab?: () => void;
+  onDeleteTab?: (index: number) => void;
+  onSelectTab?: (index: number) => void;
+  // reorder tabs by specifying from index and to index
+  onMoveTab?: (from: number, to: number) => void;
+  // Optional: control sidebar width externally (App). If provided, EditorPanel will call onSidebarWidthChange during resize.
+  sidebarWidth?: number;
+  onSidebarWidthChange?: (w: number) => void;
 }
 
 const SECTION_OPTIONS = [
@@ -23,8 +36,28 @@ const SECTION_OPTIONS = [
   { type: 'graphic' as SectionType, label: 'תמונה / גרפיקה', icon: '🖼️' },
 ];
 
-export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, selectedId, onSelect, onMove, onCloseSidebar }) =>
+export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, selectedId, onSelect, onMove, onCloseSidebar, tabs = [], activeTabIndex = 0, onAddTab, onDeleteTab, onSelectTab, onMoveTab, sidebarWidth, onSidebarWidthChange }) =>
 {
+  const [tabsOpen, setTabsOpen] = useState(false);
+  const tabsRef = useRef<HTMLDivElement | null>(null);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  // width for the editor panel (right sidebar). null means let parent handle sizing.
+  const [width, setWidth] = useState<number | null>(sidebarWidth ?? 420);
+  const draggingRef = useRef(false);
+
+  useEffect(() =>
+  {
+    const handleClick = (e: MouseEvent) =>
+    {
+      if (!tabsRef.current) return;
+      if (!(e.target instanceof Node)) return;
+      if (!tabsRef.current.contains(e.target)) setTabsOpen(false);
+    };
+    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setTabsOpen(false); };
+    document.addEventListener('click', handleClick);
+    document.addEventListener('keydown', handleKey);
+    return () => { document.removeEventListener('click', handleClick); document.removeEventListener('keydown', handleKey); };
+  }, []);
   const [pasteBuffer, setPasteBuffer] = useState('');
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const sections = report?.sections || [];
@@ -95,30 +128,127 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
 
   const supportsManualHeight = selectedSection?.type === 'chart' || selectedSection?.type === 'graphic';
 
+  useEffect(() =>
+  {
+    const onMove = (e: MouseEvent) =>
+    {
+      if (!draggingRef.current) return;
+      const newW = window.innerWidth - e.clientX; // right sidebar width
+      const min = 200;
+      const max = window.innerWidth - 100;
+      const resolved = Math.max(min, Math.min(max, newW));
+      if (onSidebarWidthChange) onSidebarWidthChange(resolved);
+      else setWidth(resolved);
+    };
+    const onUp = () =>
+    {
+      draggingRef.current = false;
+      document.body.style.cursor = '';
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    return () => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
+  }, []);
+
+  // sync when parent controls width
+  useEffect(() =>
+  {
+    if (sidebarWidth !== undefined) setWidth(sidebarWidth);
+  }, [sidebarWidth]);
+
+  const appliedWidth = width ? `${width}px` : undefined;
+
   return (
-    <div className="flex flex-col h-full bg-white border-l border-slate-200 shadow-xl" dir="rtl">
-      <div className="p-8 bg-[#002d72] text-white flex justify-between items-center shrink-0">
+    <div style={{ width: appliedWidth }} className="flex-none flex flex-col h-full bg-white border-l border-slate-200 shadow-xl" dir="rtl">
+      <div className="h-20 bg-[#002d72] text-white flex justify-between items-center shrink-0 relative">
         <div>
           <h2 className="text-2xl font-black text-white tracking-tight">מעצב הדו"ח</h2>
         </div>
-        <button onClick={onCloseSidebar} className="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all">✕</button>
+        {/* replaced collapse button with a draggable splitter handle on the left edge */}
+        <div aria-hidden className="absolute -left-3 top-0 bottom-0 w-6 flex items-center justify-center z-50">
+          <div
+            role="separator"
+            aria-orientation="vertical"
+            title="גרור כדי לשנות רוחב תפריט העריכה. לחיצה כפולה לסגירה"
+            onMouseDown={(e) => { e.preventDefault(); draggingRef.current = true; document.body.style.cursor = 'col-resize'; }}
+            onDoubleClick={() => { onCloseSidebar(); }}
+            className="h-12 w-2 bg-slate-200 rounded-full cursor-col-resize hover:bg-slate-300"
+          />
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 custom-scrollbar">
-        <button onClick={() => onSelect('tab-settings')} className={`w-full p-4 rounded-2xl border-2 flex items-center gap-3 text-right transition-all ${selectedId === 'tab-settings' ? 'border-emerald-500 bg-white shadow-lg' : 'bg-emerald-50/20 border-emerald-100 hover:border-emerald-200'}`}>
-          <span className="text-2xl">⚙️</span>
-          <div><p className="font-black text-emerald-700 text-sm leading-none mb-1">הגדרות טאב</p><p className="text-[10px] text-slate-400">כותרת, אייקון ותת-כותרת</p></div>
-        </button>
+        {/* Current tab + dropdown with full tab management */}
+        <div className="space-y-3">
+          <div ref={tabsRef} className="relative">
+            <button onClick={() => setTabsOpen(s => !s)} className={`w-full p-4 rounded-2xl border-2 flex items-center justify-between text-right transition-all ${'bg-white border-transparent hover:border-slate-100 shadow-sm'}`}>
+              <div className="flex items-center gap-3">
+                <span className="text-2xl opacity-40">{(tabs[activeTabIndex] && tabs[activeTabIndex].icon) || '📄'}</span>
+                <div>
+                  <p className="font-black text-sm leading-none mb-1 text-slate-700">{(tabs[activeTabIndex] && tabs[activeTabIndex].title) || 'טאב נוכחי'}</p>
+                  <p className="text-[10px] text-slate-400">{(tabs[activeTabIndex] && (tabs[activeTabIndex].sections || []).length) || 0} פריטים</p>
+                </div>
+              </div>
+            </button>
 
-        <div className="h-px bg-slate-200 my-2"></div>
+            {tabsOpen && (
+              <div className="absolute mt-2 right-0 left-0 z-50 bg-white border rounded-2xl shadow-lg p-3">
+                <div className="flex flex-col gap-2">
+                  {tabs.map((t, idx) => (
+                    <div
+                      key={idx}
+                      draggable
+                      onDragStart={() => setDragIndex(idx)}
+                      onDragOver={(e) => { e.preventDefault(); }}
+                      onDrop={() => { if (dragIndex !== null && dragIndex !== idx) { onMoveTab?.(dragIndex, idx); setDragIndex(null); } }}
+                      onClick={() => { onSelect(null); onSelectTab?.(idx); setTabsOpen(false); }}
+                      className={`group flex items-center justify-between p-2 rounded hover:bg-slate-50 cursor-pointer ${dragIndex === idx ? 'opacity-50' : ''}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        {/* Improved tab icon – circular badge with primary color (shown on hover) */}
+                        <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#002d72] text-white text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-150">{(t.icon && t.icon.length <= 2) ? t.icon : (t.title || 'T').charAt(0)}</span>
+                        <div className="text-right">
+                          <div className="font-black text-sm">{t.title || `טאב ${idx + 1}`}</div>
+                          <div className="text-[10px] text-slate-400">{(t.sections || []).length} פריטים</div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-150">
+                        {/* Edit icon – use same gear icon as tab settings */}
+                        <button onClick={(e) => { e.stopPropagation(); onSelectTab?.(idx); onSelect('tab-settings'); setTabsOpen(false); }} className="w-6 h-6 flex items-center justify-center bg-white border rounded text-xs">⚙️</button>
+                        {/* Delete icon – smaller, matching view area (no confirmation) */}
+                        <button onClick={(e) => { e.stopPropagation(); onDeleteTab?.(idx); }} aria-label="מחק טאב" className="w-6 h-6 flex items-center justify-center bg-rose-500 text-white rounded text-xs">×</button>
+                      </div>
+                    </div>
+                  ))}
+
+                  <div className="pt-2 border-t mt-2">
+                    <button onClick={() =>
+                    {
+                      // Request parent to add a new tab, then select it and open its settings
+                      onAddTab?.();
+                      const newIndex = tabs.length; // assume new tab is appended
+                      onSelectTab?.(newIndex);
+                      onSelect('tab-settings');
+                      setTabsOpen(false);
+                    }} className="w-full p-3 rounded-2xl border-2 border-dashed border-slate-200 bg-white/50 text-slate-600 font-black hover:bg-[#002d72] hover:text-white transition-all">+ הוסף טאב</button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
 
         {sections.map((sec: any) => (
-          <button key={sec.id} onClick={() => onSelect(sec.id)} className={`w-full p-4 rounded-2xl border-2 flex items-center justify-between text-right transition-all ${selectedId === sec.id ? 'border-[#002d72] bg-white shadow-lg' : 'bg-white border-transparent hover:border-slate-100 shadow-sm'}`}>
-            <div className="flex items-center gap-3">
-              <span className="text-2xl opacity-40">{SECTION_OPTIONS.find(o => o.type === sec.type)?.icon}</span>
-              <div><p className={`font-black text-sm leading-none mb-1 ${selectedId === sec.id ? 'text-[#002d72]' : 'text-slate-700'}`}>{sec.title || 'ללא כותרת'}</p><p className="text-[10px] text-slate-400">{sec.type.toUpperCase()}</p></div>
-            </div>
-          </button>
+          <div key={sec.id} className="relative group">
+            <button key={sec.id} onClick={() => onSelect(sec.id)} className={`w-full p-4 rounded-2xl border-2 flex items-center justify-between text-right transition-all ${selectedId === sec.id ? 'border-[#002d72] bg-white shadow-lg' : 'bg-white border-transparent hover:border-slate-100 shadow-sm'}`}>
+              <div className="flex items-center gap-3">
+                <span className="text-2xl opacity-40">{SECTION_OPTIONS.find(o => o.type === sec.type)?.icon}</span>
+                <div><p className={`font-black text-sm leading-none mb-1 ${selectedId === sec.id ? 'text-[#002d72]' : 'text-slate-700'}`}>{sec.title || 'ללא כותרת'}</p><p className="text-[10px] text-slate-400">{sec.type.toUpperCase()}</p></div>
+              </div>
+            </button>
+            <button onClick={(e) => { e.stopPropagation(); onUpdate({ ...report, sections: sections.filter((s: any) => s.id !== sec.id) }); onSelect(null); }} className="absolute -top-2 -left-2 w-8 h-8 bg-rose-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none group-hover:pointer-events-auto">×</button>
+          </div>
         ))}
 
         <div className="grid grid-cols-2 gap-3 mt-6 pt-6 border-t border-slate-200">
@@ -151,7 +281,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
         <div className="h-[75%] border-t bg-white p-8 overflow-y-auto shadow-2xl z-50 custom-scrollbar animate-in slide-in-from-bottom duration-300 text-right">
           <div className="flex justify-between items-center mb-8 border-b pb-6 sticky top-0 bg-white z-[60]">
             <h3 className="text-xl font-black text-[#002d72]">{selectedId === 'tab-settings' ? 'הגדרות טאב' : `עריכת ${SECTION_OPTIONS.find(o => o.type === selectedSection?.type)?.label}`}</h3>
-            <button onClick={() => onSelect(null)} className="text-slate-300 font-bold hover:text-slate-600">סגור ✕</button>
+            <button onClick={() => onSelect(null)} className="text-slate-300 font-bold hover:text-slate-600">סגור</button>
           </div>
 
           <div className="space-y-10 pb-32">
@@ -292,7 +422,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
                         {
                           const metrics = (selectedSection as KPISection).metrics.filter((_, i) => i !== idx);
                           updateSection(selectedId!, { metrics });
-                        }} className="absolute top-2 left-2 text-rose-500 font-bold text-[10px]">✕</button>
+                        }} aria-label="מחק מדד" className="absolute top-2 left-2 text-rose-500 font-bold text-[10px]">×</button>
                         <input type="text" value={m.label} onChange={e => { const metrics = [...(selectedSection as KPISection).metrics]; metrics[idx].label = e.target.value; updateSection(selectedId!, { metrics }); }} className="w-full p-2 border rounded-lg font-bold text-xs" placeholder="שם המדד" />
                         <div className="grid grid-cols-2 gap-2">
                           <input type="text" value={m.value} onChange={e => { const metrics = [...(selectedSection as KPISection).metrics]; metrics[idx].value = e.target.value; updateSection(selectedId!, { metrics }); }} className="p-2 border rounded-lg font-bold text-xs text-indigo-700" placeholder="ערך" />
@@ -327,7 +457,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
                           <button onClick={() =>
                           {
                             const recs = (selectedSection as SummaryEvaluationSection).recommendations.filter((_, i) => i !== idx); updateSection(selectedId!, { recommendations: recs });
-                          }} className="text-rose-500 font-bold">✕</button>
+                          }} className="text-rose-500 font-bold">×</button>
                         </div>
                       ))}
                       <button onClick={() => updateSection(selectedId!, { recommendations: [...(selectedSection as SummaryEvaluationSection).recommendations, 'המלצה חדשה'] })} className="text-[10px] font-black text-emerald-600">+ הוסף המלצה</button>
@@ -344,7 +474,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
                           <button onClick={() =>
                           {
                             const defs = (selectedSection as SummaryEvaluationSection).deficiencies.filter((_, i) => i !== idx); updateSection(selectedId!, { deficiencies: defs });
-                          }} className="text-rose-500 font-bold">✕</button>
+                          }} className="text-rose-500 font-bold">×</button>
                         </div>
                       ))}
                       <button onClick={() => updateSection(selectedId!, { deficiencies: [...(selectedSection as SummaryEvaluationSection).deficiencies, 'ליקוי חדש'] })} className="text-[10px] font-black text-rose-600">+ הוסף ליקוי</button>
@@ -452,7 +582,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
                   </div>
                 )}
 
-                <button onClick={() => { if (confirm('למחוק לצמיתות את האובייקט מהדו"ח?')) { onUpdate({ ...report, sections: sections.filter((s: any) => s.id !== selectedId) }); onSelect(null); } }} className="w-full py-6 bg-rose-50 text-rose-600 font-black rounded-[2.5rem] border-2 border-rose-100 hover:bg-rose-600 hover:text-white transition-all shadow-md mt-10">מחיקת אובייקט מהדו"ח ✕</button>
+                <button onClick={() => { onUpdate({ ...report, sections: sections.filter((s: any) => s.id !== selectedId) }); onSelect(null); }} className="w-full py-6 bg-rose-50 text-rose-600 font-black rounded-[2.5rem] border-2 border-rose-100 hover:bg-rose-600 hover:text-white transition-all shadow-md mt-10">מחיקת אובייקט מהדו"ח ×</button>
               </>
             )}
           </div>
