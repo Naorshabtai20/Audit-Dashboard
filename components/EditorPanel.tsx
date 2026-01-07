@@ -166,13 +166,6 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
 
   return (
     <div style={{ width: appliedWidth }} className="relative flex-none flex flex-col h-full bg-white border-l border-slate-200 shadow-xl" dir="rtl">
-      <div className="h-20 bg-[#002d72] text-white flex justify-between items-center shrink-0 relative">
-        <div>
-          <h2 className="text-2xl font-black text-white tracking-tight">מעצב הדו"ח</h2>
-        </div>
-      </div>
-
-      {/* Resize handle placed further outside the editor so it doesn't overlap the editor scrollbar */}
       <div className="absolute -left-12 top-0 bottom-0 w-12 z-50 pointer-events-none">
         <div
           className="absolute left-0 top-0 bottom-0 w-12 cursor-col-resize flex items-center justify-center pointer-events-auto"

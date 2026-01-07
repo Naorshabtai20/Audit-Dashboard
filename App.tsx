@@ -193,190 +193,185 @@ const App: React.FC = () =>
   }, []);
 
   return (
-    <div className="flex h-screen bg-[#f4f7fa] overflow-hidden select-none" dir="rtl">
-      <input type="file" ref={fileInputRef} className="hidden" onChange={(e) =>
-      {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (ev) =>
+    <div className="h-screen bg-[#f4f7fa] overflow-hidden select-none flex" dir="rtl">
+      <header className="h-16 bg-white border-b flex items-center justify-between p-2 z-50 fixed top-0 left-0 right-0 shadow-sm no-print">
+        <div className="flex items-center gap-4 bg-slate-100 p-1 rounded-2xl shadow-inner">
+          <button
+            onClick={() => { setEditMode(false); setSelectedId(null); }}
+            className={`px-6 py-1.5 rounded-xl text-[11px] font-bold transition-all ${!editMode ? 'bg-white text-[#002d72] shadow-md' : 'text-slate-500 hover:text-slate-800'}`}
+          >
+            תצוגה
+          </button>
+          <button
+            onClick={() => setEditMode(true)}
+            className={`px-6 py-1.5 rounded-xl text-[11px] font-bold transition-all ${editMode ? 'bg-white text-[#002d72] shadow-md' : 'text-slate-500 hover:text-slate-800'}`}
+          >
+            עריכה
+          </button>
+        </div>
+
+        <div className="flex gap-2">
+          {editMode && (
+            <>
+              <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-[11px] font-bold hover:bg-slate-50 transition-all shadow-sm" onClick={() => setShowJsonModal(true)}>JSON</button>
+              <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-[11px] font-bold hover:bg-slate-50 transition-all shadow-sm" onClick={() => fileInputRef.current?.click()}>ייבוא</button>
+              <button className="px-4 py-2 bg-rose-50 text-rose-600 rounded-xl text-[11px] font-bold hover:bg-rose-600 hover:text-white transition-all" onClick={handleResetReport}>נקה הכל</button>
+            </>
+          )}
+          <button className="px-6 py-2 bg-[#002d72] text-white rounded-xl text-[11px] font-bold shadow-xl hover:bg-blue-600 transition-all" onClick={handleExport}>ייצוא לקובץ</button>
+        </div>
+      </header>
+
+      <div className="flex-1 pt-16 flex overflow-hidden flex-row">
+        <input type="file" ref={fileInputRef} className="hidden" onChange={(e) =>
         {
-          try
+          const file = e.target.files?.[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (ev) =>
           {
-            const json = JSON.parse(ev.target?.result as string);
-            if (json.tabs) setReport(json);
-            else if (json.sections) setReport({ tabs: [{ title: 'מיובא', icon: '📥', sections: json.sections }] });
-          } catch (e)
-          {
-            alert('קובץ לא תקין');
-          }
-        };
-        reader.readAsText(file);
-      }} />
-
-      {showJsonModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-md no-print">
-          <div className="bg-white w-full max-w-3xl max-h-[85vh] rounded-[3rem] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-              <h3 className="text-xl font-bold">קוד מקור (JSON)</h3>
-              <button onClick={() => setShowJsonModal(false)} aria-label="סגור" className="w-10 h-10 flex items-center justify-center bg-white border rounded-xl hover:bg-slate-50 transition-colors">×</button>
-            </div>
-            <div className="flex-1 overflow-auto p-8 bg-slate-950 font-mono text-xs ltr text-left" dir="ltr">
-              <pre className="text-emerald-400">{JSON.stringify(report, null, 2)}</pre>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className={`${(effectiveSidebarOpen || !editMode) ? '' : 'w-0'} relative transition-all duration-500 border-l bg-white shadow-2xl flex flex-col overflow-hidden shrink-0 no-print`} style={{ width: !editMode ? viewPanelWidth : undefined }} ref={viewPanelRef}>
-        {/* Splitter handle: keep in the same place for both editor and viewer */}
-        <div
-          className="absolute left-0 top-0 bottom-0 w-6 -ml-3 z-50 flex items-center justify-center pointer-events-none"
-          style={{ touchAction: 'none' }}
-        >
-          {/* invisible non-interactive area so the splitter overlay doesn't block underlying scrollbars; actual resizing is handled by the editor's own handle */}
-          <div className="h-full w-full opacity-0 pointer-events-none" />
-        </div>
-
-        {editMode && effectiveSidebarOpen ? (
-          <EditorPanel
-            report={{
-              ...report,
-              sections: activeTab.sections,
-              tabTitle: activeTab.title,
-              tabIcon: activeTab.icon,
-              tabSubTitles: activeTab.subTitles
-            }}
-            onUpdate={(updatedData: any) =>
+            try
             {
-              const newTabs = report.tabs.map((tab, idx) =>
-                idx === activeTabIndex ? {
-                  ...tab,
-                  sections: updatedData.sections || tab.sections,
-                  title: updatedData.tabTitle ?? tab.title,
-                  icon: updatedData.tabIcon ?? tab.icon,
-                  subTitles: updatedData.tabSubTitles ?? tab.subTitles
-                } : tab
-              );
-              handleUpdateReport({ ...report, tabs: newTabs });
-            }}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-            onMove={() => { }}
-            onCloseSidebar={() => setIsSidebarOpen(false)}
-            tabs={report.tabs}
-            activeTabIndex={activeTabIndex}
-            onAddTab={handleAddTab}
-            onDeleteTab={handleDeleteTab}
-            onSelectTab={(idx) => { setActiveTabIndex(idx); setSelectedId(null); }}
-            onMoveTab={handleMoveTab}
-            sidebarWidth={viewPanelWidth}
-            onSidebarWidthChange={(w) => setViewPanelWidth(w)}
-          />
-        ) : (
-          // View-mode tabs panel placed where the editor appears
-          <>
-            <div className="h-20 bg-[#002d72] text-white flex items-center p-4 shrink-0 relative">
-              <div>
-                <h2 className="text-2xl font-black text-white tracking-tight">צופה הדו"ח</h2>
+              const json = JSON.parse(ev.target?.result as string);
+              if (json.tabs) setReport(json);
+              else if (json.sections) setReport({ tabs: [{ title: 'מיובא', icon: '📥', sections: json.sections }] });
+            } catch (e)
+            {
+              alert('קובץ לא תקין');
+            }
+          };
+          reader.readAsText(file);
+        }} />
+
+        {showJsonModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-md no-print">
+            <div className="bg-white w-full max-w-3xl max-h-[85vh] rounded-[3rem] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+              <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 className="text-xl font-bold">קוד מקור (JSON)</h3>
+                <button onClick={() => setShowJsonModal(false)} aria-label="סגור" className="w-10 h-10 flex items-center justify-center bg-white border rounded-xl hover:bg-slate-50 transition-colors">×</button>
+              </div>
+              <div className="flex-1 overflow-auto p-8 bg-slate-950 font-mono text-xs ltr text-left" dir="ltr">
+                <pre className="text-emerald-400">{JSON.stringify(report, null, 2)}</pre>
               </div>
             </div>
-
-            <div className="overflow-auto">
-              {report.tabs.map((t, idx) => (
-                <div key={idx} className={`group flex items-center p-2 hover:bg-slate-50 ${idx === activeTabIndex ? 'text-slate-900' : 'text-slate-600'}`}>
-                  <button
-                    type="button"
-                    onClick={() => { setActiveTabIndex(idx); setSelectedId(null); }}
-                    className={`flex items-center gap-3 flex-1 flex-row-reverse justify-end text-right transition-all ${idx === activeTabIndex ? 'rounded-2xl border-2 bg-white shadow-lg p-3' : 'p-3 rounded-xl'}`}
-                  >
-                    <div className="text-right">
-                      <div className={`font-black text-sm ${idx === activeTabIndex ? 'text-[#002d72]' : ''}`}>{t.title || `טאב ${idx + 1}`}</div>
-                      <div className="text-[10px] text-slate-400">{(t.sections || []).length} פריטים</div>
-                    </div>
-                    <span className={`flex items-center justify-center w-6 h-6 rounded-full text-white text-sm transition-opacity duration-150 ${idx === activeTabIndex ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-                      {(t.icon && t.icon.length <= 2) ? t.icon : (t.title || 'T').charAt(0)}
-                    </span>
-                  </button>
-                </div>
-              ))}
-            </div>
-          </>
+          </div>
         )}
-      </div>
 
-      <div className="flex-1 flex flex-col min-w-0 bg-[#f4f7fa]">
-        <header className="h-20 bg-white border-b flex items-center justify-between px-10 z-50 sticky top-0 shadow-sm no-print">
-          <div className="flex items-center gap-4 bg-slate-100 p-1 rounded-2xl shadow-inner">
-            <button
-              onClick={() => { setEditMode(false); setSelectedId(null); }}
-              className={`px-6 py-1.5 rounded-xl text-[11px] font-bold transition-all ${!editMode ? 'bg-white text-[#002d72] shadow-md' : 'text-slate-500 hover:text-slate-800'}`}
-            >
-              תצוגה
-            </button>
-            <button
-              onClick={() => setEditMode(true)}
-              className={`px-6 py-1.5 rounded-xl text-[11px] font-bold transition-all ${editMode ? 'bg-white text-[#002d72] shadow-md' : 'text-slate-500 hover:text-slate-800'}`}
-            >
-              עריכה
-            </button>
+        <div className={`${(effectiveSidebarOpen || !editMode) ? '' : 'w-0'} relative transition-all duration-500 border-l bg-white shadow-2xl flex flex-col overflow-hidden shrink-0 no-print`} style={{ width: !editMode ? viewPanelWidth : undefined }} ref={viewPanelRef}>
+          {/* Splitter handle: keep in the same place for both editor and viewer */}
+          <div
+            className="absolute left-0 top-0 bottom-0 w-6 -ml-3 z-50 flex items-center justify-center pointer-events-none"
+            style={{ touchAction: 'none' }}
+          >
+            {/* invisible non-interactive area so the splitter overlay doesn't block underlying scrollbars; actual resizing is handled by the editor's own handle */}
+            <div className="h-full w-full opacity-0 pointer-events-none" />
           </div>
 
-          <div className="flex gap-2">
-            {editMode && (
-              <>
-                <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-[11px] font-bold hover:bg-slate-50 transition-all shadow-sm" onClick={() => setShowJsonModal(true)}>JSON</button>
-                <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-[11px] font-bold hover:bg-slate-50 transition-all shadow-sm" onClick={() => fileInputRef.current?.click()}>ייבוא</button>
-                <button className="px-4 py-2 bg-rose-50 text-rose-600 rounded-xl text-[11px] font-bold hover:bg-rose-600 hover:text-white transition-all" onClick={handleResetReport}>נקה הכל</button>
-              </>
-            )}
-            <button className="px-6 py-2 bg-[#002d72] text-white rounded-xl text-[11px] font-bold shadow-xl hover:bg-blue-600 transition-all" onClick={handleExport}>ייצוא לקובץ</button>
-          </div>
-        </header>
-
-        <main className="flex-1 overflow-y-auto custom-scrollbar transition-all p-8">
-          <div className="max-w-[1400px] mx-auto mb-10 text-right">
-            <p className="text-slate-400 font-bold uppercase tracking-[0.3em] text-4xl mb-1">{activeTab.icon} {activeTab.title}</p>
-            {activeTab.subTitles && <h2 className="text-[10px] font-black text-[#002d72] tracking-tighter">{activeTab.subTitles}</h2>}
-          </div>
-
-          <div className={`max-w-[1400px] mx-auto grid grid-cols-12 gap-8 pb-32`}>
-            {activeTab.sections.length === 0 ? (
-              <div className="col-span-12 h-64 flex flex-col items-center justify-center border-2 border-dashed rounded-[3rem] text-slate-300 bg-white/50 border-slate-200">
-                <span className="text-5xl mb-4">📄</span>
-                <p className="text-lg font-bold">הטאב ריק. הוסיפו אובייקטים מהתפריט בצד.</p>
-                {editMode && <button onClick={() => setIsSidebarOpen(true)} className="mt-2 text-[#002d72] font-bold underline">לחצו להוספת אובייקט</button>}
+          {editMode && effectiveSidebarOpen ? (
+            <EditorPanel
+              report={{
+                ...report,
+                sections: activeTab.sections,
+                tabTitle: activeTab.title,
+                tabIcon: activeTab.icon,
+                tabSubTitles: activeTab.subTitles
+              }}
+              onUpdate={(updatedData: any) =>
+              {
+                const newTabs = report.tabs.map((tab, idx) =>
+                  idx === activeTabIndex ? {
+                    ...tab,
+                    sections: updatedData.sections || tab.sections,
+                    title: updatedData.tabTitle ?? tab.title,
+                    icon: updatedData.tabIcon ?? tab.icon,
+                    subTitles: updatedData.tabSubTitles ?? tab.subTitles
+                  } : tab
+                );
+                handleUpdateReport({ ...report, tabs: newTabs });
+              }}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+              onMove={() => { }}
+              onCloseSidebar={() => setIsSidebarOpen(false)}
+              tabs={report.tabs}
+              activeTabIndex={activeTabIndex}
+              onAddTab={handleAddTab}
+              onDeleteTab={handleDeleteTab}
+              onSelectTab={(idx) => { setActiveTabIndex(idx); setSelectedId(null); }}
+              onMoveTab={handleMoveTab}
+              sidebarWidth={viewPanelWidth}
+              onSidebarWidthChange={(w) => setViewPanelWidth(w)}
+            />
+          ) : (
+            <>
+              <div className="overflow-auto">
+                {report.tabs.map((t, idx) => (
+                  <div key={idx} className={`group flex items-center p-2 hover:bg-slate-50 ${idx === activeTabIndex ? 'text-slate-900' : 'text-slate-600'}`}>
+                    <button
+                      type="button"
+                      onClick={() => { setActiveTabIndex(idx); setSelectedId(null); }}
+                      className={`flex items-center gap-3 flex-1 flex-row-reverse justify-end text-right transition-all ${idx === activeTabIndex ? 'rounded-2xl border-2 bg-white shadow-lg p-3' : 'p-3 rounded-xl'}`}
+                    >
+                      <div className="text-right">
+                        <div className={`font-black text-sm ${idx === activeTabIndex ? 'text-[#002d72]' : ''}`}>{t.title || `טאב ${idx + 1}`}</div>
+                        <div className="text-[10px] text-slate-400">{(t.sections || []).length} פריטים</div>
+                      </div>
+                      <span className={`flex items-center justify-center w-6 h-6 rounded-full text-white text-sm transition-opacity duration-150 ${idx === activeTabIndex ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                        {(t.icon && t.icon.length <= 2) ? t.icon : (t.title || 'T').charAt(0)}
+                      </span>
+                    </button>
+                  </div>
+                ))}
               </div>
-            ) : (
-              activeTab.sections.map((section) => (
-                <div
-                  id={section.id}
-                  key={section.id}
-                  draggable={editMode && !selectedId}
-                  onDragStart={() => handleDragStart(section.id)}
-                  onDragOver={(e) => handleDragOver(e, section.id)}
-                  onDragEnd={handleDragEnd}
-                  className={`transition-all duration-300 ${draggedId === section.id ? 'opacity-30 scale-95' : 'opacity-100'} ${!editMode ? 'hover:scale-[1.002]' : ''}`}
-                  style={{ gridColumn: `span ${section.styles?.colSpan || 12}` }}
-                >
-                  <SectionPreview
-                    section={section}
-                    isSelected={editMode && selectedId === section.id}
-                    onDelete={editMode ? (id) =>
-                    {
-                      const newSections = activeTab.sections.filter(s => s.id !== id);
-                      handleUpdateActiveTabSections(newSections);
-                    } : undefined as any}
-                    onSelect={editMode ? setSelectedId : undefined as any}
-                  />
+            </>
+          )}
+        </div>
+
+        <div className="flex-1 flex flex-col min-w-0 bg-[#f4f7fa] overflow-hidden">
+          <div className="flex-1 overflow-auto custom-scrollbar transition-all p-4">
+            <div className="max-w-[1400px] mx-auto mb-10 text-right">
+              <p className="text-slate-400 font-bold uppercase tracking-[0.3em] text-4xl mb-1">{activeTab.icon} {activeTab.title}</p>
+              {activeTab.subTitles && <h2 className="text-[10px] font-black text-[#002d72] tracking-tighter">{activeTab.subTitles}</h2>}
+            </div>
+
+            <div className={`max-w-[1400px] mx-auto grid grid-cols-12 gap-8 pb-32`}>
+              {activeTab.sections.length === 0 ? (
+                <div className="col-span-12 h-64 flex flex-col items-center justify-center border-2 border-dashed rounded-[3rem] text-slate-300 bg-white/50 border-slate-200">
+                  <span className="text-5xl mb-4">📄</span>
+                  <p className="text-lg font-bold">הטאב ריק. הוסיפו אובייקטים מהתפריט בצד.</p>
+                  {editMode && <button onClick={() => setIsSidebarOpen(true)} className="mt-2 text-[#002d72] font-bold underline">לחצו להוספת אובייקט</button>}
                 </div>
-              ))
-            )}
+              ) : (
+                activeTab.sections.map((section) => (
+                  <div
+                    id={section.id}
+                    key={section.id}
+                    draggable={editMode && !selectedId}
+                    onDragStart={() => handleDragStart(section.id)}
+                    onDragOver={(e) => handleDragOver(e, section.id)}
+                    onDragEnd={handleDragEnd}
+                    className={`transition-all duration-300 ${draggedId === section.id ? 'opacity-30 scale-95' : 'opacity-100'} ${!editMode ? 'hover:scale-[1.002]' : ''}`}
+                    style={{ gridColumn: `span ${section.styles?.colSpan || 12}` }}
+                  >
+                    <SectionPreview
+                      section={section}
+                      isSelected={editMode && selectedId === section.id}
+                      onDelete={editMode ? (id) =>
+                      {
+                        const newSections = activeTab.sections.filter(s => s.id !== id);
+                        handleUpdateActiveTabSections(newSections);
+                      } : undefined as any}
+                      onSelect={editMode ? setSelectedId : undefined as any}
+                    />
+                  </div>
+                ))
+              )}
+            </div>
           </div>
-        </main>
+        </div>
+
+
       </div>
-
-
     </div>
   );
 };
