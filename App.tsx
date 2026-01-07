@@ -238,10 +238,10 @@ const App: React.FC = () =>
             startWidthRef.current = viewPanelRef.current ? viewPanelRef.current.offsetWidth : viewPanelWidth;
             document.body.style.cursor = 'col-resize';
           }}
-          className="absolute left-0 top-0 bottom-0 w-6 -ml-3 z-50 flex items-center justify-center"
+          className="absolute left-0 top-0 bottom-0 w-6 -ml-3 z-50 flex items-center justify-center cursor-col-resize"
           style={{ touchAction: 'none' }}
         >
-          {/* visual handle removed but area remains to support live resizing */}
+          {/* invisible interactive area to support live resizing */}
           <div className="h-full w-full opacity-0" />
         </div>
 
@@ -341,7 +341,7 @@ const App: React.FC = () =>
           </div>
         </header>
 
-        <main className={`flex-1 overflow-y-auto custom-scrollbar transition-all ${editMode ? 'p-8' : 'p-16'}`}>
+        <main className="flex-1 overflow-y-auto custom-scrollbar transition-all p-8">
           <div className="max-w-[1400px] mx-auto mb-10 text-right">
             <p className="text-slate-400 font-bold uppercase tracking-[0.3em] text-[10px] mb-1">{activeTab.icon} {activeTab.title}</p>
             <h2 className="text-4xl font-black text-[#002d72] tracking-tighter">{activeTab.subTitles || 'מבט על'}</h2>

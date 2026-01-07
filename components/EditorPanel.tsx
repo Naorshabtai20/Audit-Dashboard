@@ -41,9 +41,9 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
   const [tabsOpen, setTabsOpen] = useState(false);
   const tabsRef = useRef<HTMLDivElement | null>(null);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [sectionDragIndex, setSectionDragIndex] = useState<number | null>(null);
   // width for the editor panel (right sidebar). null means let parent handle sizing.
   const [width, setWidth] = useState<number | null>(sidebarWidth ?? 420);
-  const draggingRef = useRef(false);
 
   useEffect(() =>
   {
@@ -128,27 +128,8 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
 
   const supportsManualHeight = selectedSection?.type === 'chart' || selectedSection?.type === 'graphic';
 
-  useEffect(() =>
-  {
-    const onMove = (e: MouseEvent) =>
-    {
-      if (!draggingRef.current) return;
-      const newW = window.innerWidth - e.clientX; // right sidebar width
-      const min = 200;
-      const max = window.innerWidth - 100;
-      const resolved = Math.max(min, Math.min(max, newW));
-      if (onSidebarWidthChange) onSidebarWidthChange(resolved);
-      else setWidth(resolved);
-    };
-    const onUp = () =>
-    {
-      draggingRef.current = false;
-      document.body.style.cursor = '';
-    };
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
-    return () => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
-  }, []);
+  // EditorPanel no longer implements its own drag-to-resize logic.
+  // Resizing is handled centrally by App to keep behavior consistent between editor and viewer.
 
   // sync when parent controls width
   useEffect(() =>
@@ -164,17 +145,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
         <div>
           <h2 className="text-2xl font-black text-white tracking-tight">מעצב הדו"ח</h2>
         </div>
-        {/* replaced collapse button with a draggable splitter handle on the left edge */}
-        <div aria-hidden className="absolute -left-3 top-0 bottom-0 w-6 flex items-center justify-center z-50">
-          <div
-            role="separator"
-            aria-orientation="vertical"
-            title="גרור כדי לשנות רוחב תפריט העריכה. לחיצה כפולה לסגירה"
-            onMouseDown={(e) => { e.preventDefault(); draggingRef.current = true; document.body.style.cursor = 'col-resize'; }}
-            onDoubleClick={() => { onCloseSidebar(); }}
-            className="h-12 w-2 bg-slate-200 rounded-full cursor-col-resize hover:bg-slate-300"
-          />
-        </div>
+        {/* Editor no longer shows its own visible separator; resizing is handled by App */}
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 custom-scrollbar">
@@ -206,7 +177,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
                     >
                       <div className="flex items-center gap-3">
                         {/* Improved tab icon – circular badge with primary color (shown on hover) */}
-                        <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#002d72] text-white text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-150">{(t.icon && t.icon.length <= 2) ? t.icon : (t.title || 'T').charAt(0)}</span>
+                        <span className="flex items-center justify-center w-6 h-6 rounded-full text-white text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-150">{(t.icon && t.icon.length <= 2) ? t.icon : (t.title || 'T').charAt(0)}</span>
                         <div className="text-right">
                           <div className="font-black text-sm">{t.title || `טאב ${idx + 1}`}</div>
                           <div className="text-[10px] text-slate-400">{(t.sections || []).length} פריטים</div>
@@ -239,15 +210,29 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
           </div>
         </div>
 
-        {sections.map((sec: any) => (
-          <div key={sec.id} className="relative group">
-            <button key={sec.id} onClick={() => onSelect(sec.id)} className={`w-full p-4 rounded-2xl border-2 flex items-center justify-between text-right transition-all ${selectedId === sec.id ? 'border-[#002d72] bg-white shadow-lg' : 'bg-white border-transparent hover:border-slate-100 shadow-sm'}`}>
+        {sections.map((sec: any, idx: number) => (
+          <div
+            key={sec.id}
+            className="relative group"
+            draggable
+            onDragStart={(e) => { setSectionDragIndex(idx); e.dataTransfer?.setData('text/plain', String(idx)); }}
+            onDragOver={(e) => { e.preventDefault(); }}
+            onDrop={(e) => { e.preventDefault(); if (sectionDragIndex !== null && sectionDragIndex !== idx) { const newSections = [...sections]; const [moved] = newSections.splice(sectionDragIndex, 1); newSections.splice(idx, 0, moved); onUpdate({ ...report, sections: newSections }); setSectionDragIndex(null); } }}
+            onDragEnd={() => setSectionDragIndex(null)}
+          >
+            <button onClick={() => onSelect(sec.id)} className={`w-full p-4 rounded-2xl border-2 flex items-center justify-between text-right transition-all ${selectedId === sec.id ? 'border-[#002d72] bg-white shadow-lg' : 'bg-white border-transparent hover:border-slate-100 shadow-sm'} ${sectionDragIndex === idx ? 'opacity-50' : ''}`}>
               <div className="flex items-center gap-3">
                 <span className="text-2xl opacity-40">{SECTION_OPTIONS.find(o => o.type === sec.type)?.icon}</span>
                 <div><p className={`font-black text-sm leading-none mb-1 ${selectedId === sec.id ? 'text-[#002d72]' : 'text-slate-700'}`}>{sec.title || 'ללא כותרת'}</p><p className="text-[10px] text-slate-400">{sec.type.toUpperCase()}</p></div>
               </div>
             </button>
-            <button onClick={(e) => { e.stopPropagation(); onUpdate({ ...report, sections: sections.filter((s: any) => s.id !== sec.id) }); onSelect(null); }} className="absolute -top-2 -left-2 w-8 h-8 bg-rose-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none group-hover:pointer-events-auto">×</button>
+            <button
+              onClick={(e) => { e.stopPropagation(); onUpdate({ ...report, sections: sections.filter((s: any) => s.id !== sec.id) }); onSelect(null); }}
+              aria-label="מחק אובייקט"
+              className="absolute top-2 left-2 w-6 h-6 bg-rose-500 text-white rounded flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none group-hover:pointer-events-auto text-xs"
+            >
+              ×
+            </button>
           </div>
         ))}
 
@@ -359,11 +344,17 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
                         <div key={item.id} className="p-6 bg-slate-50 border-2 border-slate-200 rounded-[2rem] space-y-4 shadow-inner text-right">
                           <div className="flex justify-between items-center border-b pb-3 mb-3">
                             <span className="font-black text-[10px] text-slate-400">ממצא #{idx + 1}</span>
-                            <button onClick={() =>
-                            {
-                              const items = (selectedSection as AnomalySection).items.filter((_, i) => i !== idx);
-                              updateSection(selectedId!, { items });
-                            }} className="text-rose-500 font-bold text-xs">מחק</button>
+                            <button
+                              onClick={() =>
+                              {
+                                const items = (selectedSection as AnomalySection).items.filter((_, i) => i !== idx);
+                                updateSection(selectedId!, { items });
+                              }}
+                              aria-label={`מחק ממצא ${idx + 1}`}
+                              className="w-6 h-6 bg-rose-500 text-white rounded flex items-center justify-center text-xs font-extrabold"
+                            >
+                              ×
+                            </button>
                           </div>
                           <input type="text" value={item.title} onChange={e =>
                           {
@@ -418,11 +409,17 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
                     <label className="text-xs font-black text-indigo-600 block border-b pb-2 uppercase tracking-widest">מדדי KPI</label>
                     {(selectedSection as KPISection).metrics.map((m, idx) => (
                       <div key={idx} className="p-4 bg-slate-50 border rounded-2xl space-y-3 relative text-right">
-                        <button onClick={() =>
-                        {
-                          const metrics = (selectedSection as KPISection).metrics.filter((_, i) => i !== idx);
-                          updateSection(selectedId!, { metrics });
-                        }} aria-label="מחק מדד" className="absolute top-2 left-2 text-rose-500 font-bold text-[10px]">×</button>
+                        <button
+                          onClick={() =>
+                          {
+                            const metrics = (selectedSection as KPISection).metrics.filter((_, i) => i !== idx);
+                            updateSection(selectedId!, { metrics });
+                          }}
+                          aria-label="מחק מדד"
+                          className="absolute top-2 left-2 w-6 h-6 bg-white text-rose-500 rounded flex items-center justify-center border border-rose-100 text-xs font-extrabold shadow-sm"
+                        >
+                          ×
+                        </button>
                         <input type="text" value={m.label} onChange={e => { const metrics = [...(selectedSection as KPISection).metrics]; metrics[idx].label = e.target.value; updateSection(selectedId!, { metrics }); }} className="w-full p-2 border rounded-lg font-bold text-xs" placeholder="שם המדד" />
                         <div className="grid grid-cols-2 gap-2">
                           <input type="text" value={m.value} onChange={e => { const metrics = [...(selectedSection as KPISection).metrics]; metrics[idx].value = e.target.value; updateSection(selectedId!, { metrics }); }} className="p-2 border rounded-lg font-bold text-xs text-indigo-700" placeholder="ערך" />
@@ -454,10 +451,16 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
                           {
                             const recs = [...(selectedSection as SummaryEvaluationSection).recommendations]; recs[idx] = e.target.value; updateSection(selectedId!, { recommendations: recs });
                           }} className="flex-1 p-2 border rounded-lg text-xs" />
-                          <button onClick={() =>
-                          {
-                            const recs = (selectedSection as SummaryEvaluationSection).recommendations.filter((_, i) => i !== idx); updateSection(selectedId!, { recommendations: recs });
-                          }} className="text-rose-500 font-bold">×</button>
+                          <button
+                            onClick={() =>
+                            {
+                              const recs = (selectedSection as SummaryEvaluationSection).recommendations.filter((_, i) => i !== idx); updateSection(selectedId!, { recommendations: recs });
+                            }}
+                            aria-label={`מחק המלצה ${idx + 1}`}
+                            className="w-6 h-6 bg-rose-500 text-white rounded flex items-center justify-center text-xs font-extrabold"
+                          >
+                            ×
+                          </button>
                         </div>
                       ))}
                       <button onClick={() => updateSection(selectedId!, { recommendations: [...(selectedSection as SummaryEvaluationSection).recommendations, 'המלצה חדשה'] })} className="text-[10px] font-black text-emerald-600">+ הוסף המלצה</button>
@@ -471,10 +474,16 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
                           {
                             const defs = [...(selectedSection as SummaryEvaluationSection).deficiencies]; defs[idx] = e.target.value; updateSection(selectedId!, { deficiencies: defs });
                           }} className="flex-1 p-2 border rounded-lg text-xs" />
-                          <button onClick={() =>
-                          {
-                            const defs = (selectedSection as SummaryEvaluationSection).deficiencies.filter((_, i) => i !== idx); updateSection(selectedId!, { deficiencies: defs });
-                          }} className="text-rose-500 font-bold">×</button>
+                          <button
+                            onClick={() =>
+                            {
+                              const defs = (selectedSection as SummaryEvaluationSection).deficiencies.filter((_, i) => i !== idx); updateSection(selectedId!, { deficiencies: defs });
+                            }}
+                            aria-label={`מחק ליקוי ${idx + 1}`}
+                            className="w-6 h-6 bg-rose-500 text-white rounded flex items-center justify-center text-xs font-extrabold"
+                          >
+                            ×
+                          </button>
                         </div>
                       ))}
                       <button onClick={() => updateSection(selectedId!, { deficiencies: [...(selectedSection as SummaryEvaluationSection).deficiencies, 'ליקוי חדש'] })} className="text-[10px] font-black text-rose-600">+ הוסף ליקוי</button>
