@@ -28,7 +28,7 @@ export const INITIAL_REPORT: Report = {
                 },
                 {
                     id: "sec-2",
-                    type: "data_chart",
+                    type: "chart",
                     title: "התפלגות מכירות חודשית",
                     chartKind: "bar",
                     data: [
