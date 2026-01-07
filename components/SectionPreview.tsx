@@ -26,11 +26,11 @@ const Card: React.FC<{
   return (
     <div 
       onClick={(e) => { if(onSelect) { e.stopPropagation(); onSelect(); } }}
-      className={`group transition-all duration-300 relative w-full flex flex-col overflow-hidden ${
+      className={`group transition-all duration-500 relative w-full flex flex-col overflow-hidden ${
           pill ? 'rounded-[100px]' : 'rounded-[1.5rem] lg:rounded-[2.5rem]'
       } ${
           isSelected 
-          ? 'bg-white shadow-[0_40px_100px_-20px_rgba(0,45,114,0.15)] border-[#002d72] z-30 border-2 scale-[1.01]' 
+          ? 'bg-white shadow-[0_50px_100px_-20px_rgba(0,45,114,0.3)] border-[#002d72] ring-4 ring-[#002d72]/10 z-30 border-2 scale-[1.02]' 
           : 'bg-white shadow-lg border border-slate-100 hover:border-slate-200 z-10'
       } ${!onSelect ? 'cursor-default' : 'cursor-pointer'} ${className || ''}`}
       style={{ 
@@ -171,15 +171,28 @@ export const SectionPreview: React.FC<{
 
   const renderKPI = (sec: KPISection) => (
     <div className="flex flex-wrap w-full gap-4">
-      {sec.metrics.map((m, i) => (
-        <div key={i} className="flex-grow basis-[200px] bg-white rounded-[1.2rem] text-right border border-slate-100 flex flex-col justify-center p-6 shadow-sm hover:shadow-md transition-shadow">
-          <p className="font-black text-slate-400 uppercase truncate" style={{ fontSize: `${12 * labelFontScale}px`, marginBottom: '0.5rem' }}>{m.label}</p>
-          <div className="flex items-baseline justify-between overflow-hidden gap-2">
-            <span className="font-black truncate" style={{ fontSize: `${2.2 * dataFontScale}rem`, color: textColor }}>{m.value}</span>
-            {m.delta && <span className="font-black text-emerald-600 shrink-0" style={{ fontSize: `${11 * labelFontScale}px` }}>{m.delta}</span>}
+      {sec.metrics.map((m, i) => {
+        const deltaStr = m.delta?.toString() || '';
+        const isNegative = deltaStr.includes('-');
+        const isPositive = deltaStr.length > 0 && !isNegative;
+        const arrow = isNegative ? '↓' : (isPositive ? '↑' : '');
+        const deltaColor = isNegative ? 'text-rose-600' : 'text-emerald-600';
+
+        return (
+          <div key={i} className="flex-grow basis-[200px] bg-white rounded-[1.2rem] text-right border border-slate-100 flex flex-col justify-center p-6 shadow-sm hover:shadow-md transition-shadow">
+            <p className="font-black text-slate-400 uppercase truncate" style={{ fontSize: `${12 * labelFontScale}px`, marginBottom: '0.5rem' }}>{m.label}</p>
+            <div className="flex items-baseline justify-between overflow-hidden gap-2">
+              <span className="font-black truncate" style={{ fontSize: `${2.2 * dataFontScale}rem`, color: textColor }}>{m.value}</span>
+              {m.delta && (
+                <span className={`font-black shrink-0 flex items-center gap-1 ${deltaColor}`} style={{ fontSize: `${11 * labelFontScale}px` }}>
+                  <span>{arrow}</span>
+                  <span>{m.delta}</span>
+                </span>
+              )}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 

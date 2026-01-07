@@ -14,7 +14,6 @@ const App: React.FC = () => {
       try {
         const parsed = JSON.parse(saved);
         if (parsed.tabs) return parsed;
-        // Migration for old format
         return { tabs: [{ title: 'ראשי', icon: '📄', sections: parsed.sections || [] }] };
       } catch (e) {
         return INITIAL_REPORT;
@@ -31,6 +30,16 @@ const App: React.FC = () => {
   const [editMode, setEditMode] = useState(true);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('saved');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-scroll logic: when selectedId changes, scroll the report to that item
+  useEffect(() => {
+    if (selectedId && selectedId !== 'tab-settings') {
+      const element = document.getElementById(selectedId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }, [selectedId]);
 
   useEffect(() => {
     setSaveStatus('saving');
@@ -282,6 +291,7 @@ const App: React.FC = () => {
             ) : (
               activeTab.sections.map((section) => (
                 <div 
+                  id={section.id}
                   key={section.id} 
                   draggable={editMode && !selectedId}
                   onDragStart={() => handleDragStart(section.id)}
