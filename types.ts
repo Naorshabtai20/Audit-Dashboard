@@ -80,13 +80,14 @@ export interface DatePickerSection extends SectionBase {
 export interface AnomalyItem {
     id: string;
     title: string;
-    department: string;
+    department: string; // "גורם מבוקר"
     status: string;
     riskLevel: number; // 1-5 scale
     riskAnalysis: string;
     detailedReport: string;
     internalRef: string;
     protocolStatus: string;
+    link?: string;
 }
 
 export interface AnomalySection extends SectionBase {

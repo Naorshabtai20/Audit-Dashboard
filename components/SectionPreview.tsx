@@ -124,44 +124,94 @@ export const SectionPreview: React.FC<{
   );
 
   const renderAnomaly = (sec: AnomalySection) => (
-    <div className="w-full text-right flex flex-col gap-3" style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}>
+    <div className="w-full text-right flex flex-col gap-8" style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}>
       {(sec.items || []).map((item, i) => {
         const isExpanded = expandedAnomalyId === item.id;
+        const indexStr = (i + 1).toString().padStart(2, '0');
+        
         return (
-          <div 
-            key={item.id} 
-            onClick={(e) => { e.stopPropagation(); setExpandedAnomalyId(isExpanded ? null : item.id); }}
-            className={`transition-all duration-300 border border-slate-100 shadow-sm p-4 ${
-                isExpanded ? 'bg-white rounded-[1.2rem] mb-3 shadow-xl' : 'bg-slate-50/50 hover:bg-white rounded-[30px] cursor-pointer'
-            }`}
-          >
-            <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-4">
-                <div className="flex shrink-0 gap-1 order-2 sm:order-1">
-                    {[1,2,3,4,5].map(dot => (
-                        <div key={dot} className={`rounded-full ${dot <= item.riskLevel ? 'bg-rose-500' : 'bg-slate-200'}`} style={{ width: '0.4rem', height: '1.2rem' }}></div>
-                    ))}
-                </div>
-                <div className="flex-1 flex flex-col min-w-0 order-3 sm:order-2">
-                    <h3 className="font-black text-slate-800" style={{ fontSize: `${1 * fontScale}rem` }}>{item.title}</h3>
-                    <div className="flex items-center justify-end mt-1 gap-3">
-                        <span className="font-bold text-indigo-500 uppercase whitespace-nowrap" style={{ fontSize: `${10 * labelFontScale}px` }}>{item.status}</span>
-                        <span className="font-black text-slate-400 uppercase whitespace-nowrap" style={{ fontSize: `${10 * labelFontScale}px` }}>| {item.department}</span>
+          <div key={item.id} className="flex flex-col gap-6">
+            {/* Header / Summary row */}
+            <div 
+              onClick={(e) => { e.stopPropagation(); setExpandedAnomalyId(isExpanded ? null : item.id); }}
+              className={`transition-all duration-300 relative rounded-full border-2 p-5 flex items-center justify-between cursor-pointer ${
+                isExpanded ? 'bg-blue-50/30 border-blue-400 shadow-xl' : 'bg-white border-blue-100 hover:border-blue-200 shadow-sm'
+              }`}
+            >
+              {/* Left: Risk bars and Label */}
+              <div className="flex gap-1 shrink-0 px-4">
+                {[1,2,3,4,5].map(dot => (
+                  <div key={dot} className={`rounded-sm ${dot <= item.riskLevel ? 'bg-rose-500' : 'bg-slate-200'}`} style={{ width: '0.6rem', height: '1.8rem' }}></div>
+                ))}
+                <span className="mr-3 font-black text-blue-900/40 uppercase tracking-tighter" style={{ fontSize: '10px', marginTop: 'auto' }}>CONTRACT DETAILS</span>
+              </div>
+
+              {/* Center: Title and info */}
+              <div className="flex-1 flex flex-col px-6">
+                 <h3 className="font-black text-[#002d72] truncate" style={{ fontSize: `${1.1 * fontScale}rem` }}>{item.title}</h3>
+                 <div className="flex items-center mt-1 gap-6">
+                    <div className="flex items-center gap-1">
+                       <span className="text-[10px] font-bold text-slate-400">סטטוס:</span>
+                       <span className="text-[10px] font-black text-blue-600">{item.status}</span>
                     </div>
-                </div>
-                <span className="font-black text-slate-200 italic shrink-0 leading-none order-1 sm:order-3" style={{ fontSize: `${2.2 * dataFontScale}rem` }}>{(i + 1).toString().padStart(2, '0')}</span>
+                    <div className="flex items-center gap-1 px-3 py-0.5 bg-slate-100 rounded-lg">
+                       <span className="text-[10px] font-bold text-slate-400">גורם מבוקר:</span>
+                       <span className="text-[10px] font-black text-slate-600">{item.department}</span>
+                    </div>
+                    <span className="font-black text-slate-300 text-lg">·</span>
+                 </div>
+              </div>
+
+              {/* Right: Index number (faded) */}
+              <div className="relative flex items-center justify-center w-24 h-full">
+                <span className="font-black text-blue-100 italic" style={{ fontSize: '3.5rem', lineHeight: '1' }}>{indexStr}</span>
+              </div>
             </div>
 
+            {/* Expanded details */}
             {isExpanded && (
-                <div className="border-t border-slate-100 animate-in fade-in duration-300 mt-4 pt-4 flex flex-col gap-4">
-                    <div className="space-y-1">
-                        <span className="font-black text-indigo-500 uppercase block" style={{ fontSize: `${11 * labelFontScale}px` }}>REPORT_DETAIL</span>
-                        <p className="text-slate-700 font-bold leading-relaxed" style={{ fontSize: `${1 * dataFontScale}rem` }}>{item.detailedReport || 'אין פירוט.'}</p>
+              <div className="bg-slate-50/50 rounded-[3rem] p-10 animate-in slide-in-from-top-4 duration-500 flex flex-col gap-10">
+                 {/* Main content row */}
+                 <div className="grid grid-cols-12 gap-8">
+                    {/* Left side card: Risk factor analysis */}
+                    <div className="col-span-12 lg:col-span-5 bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col gap-4 text-right">
+                       <span className="font-black text-slate-400 uppercase tracking-widest block text-[11px] border-b pb-2">RISK FACTOR ANALYSIS</span>
+                       <div className="text-[#002d72] font-black leading-relaxed whitespace-pre-wrap" style={{ fontSize: `${1 * dataFontScale}rem` }}>
+                          {item.riskAnalysis || 'אין ניתוח סיכונים מפורט.'}
+                       </div>
                     </div>
-                    <div className="bg-rose-50/30 rounded-xl p-4 mt-2 flex flex-col gap-1 border border-rose-100">
-                        <span className="font-black text-rose-500 uppercase block" style={{ fontSize: `${10 * labelFontScale}px` }}>RISK_ANALYSIS</span>
-                        <p className="text-slate-600 italic font-bold" style={{ fontSize: `${0.9 * dataFontScale}rem` }}>{item.riskAnalysis}</p>
+
+                    {/* Right side card: Detailed report */}
+                    <div className="col-span-12 lg:col-span-7 bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col gap-4 text-right">
+                       <span className="font-black text-blue-600 uppercase tracking-widest block text-[11px] border-b pb-2">DETAILED ANOMALY REPORT</span>
+                       <div className="text-[#002d72] font-black leading-relaxed whitespace-pre-wrap" style={{ fontSize: `${1.1 * dataFontScale}rem` }}>
+                          {item.detailedReport || 'אין פירוט דוח.'}
+                       </div>
                     </div>
-                </div>
+                 </div>
+
+                 {/* Bottom items row */}
+                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col gap-2 items-center text-center">
+                       <span className="font-black text-slate-400 uppercase tracking-widest text-[10px]">INTERNAL REFERENCE</span>
+                       <span className="font-black text-[#002d72] text-xl tracking-tight">{item.internalRef || 'N/A'}</span>
+                    </div>
+                    <div className="bg-blue-50/50 p-6 rounded-[2rem] shadow-sm border border-blue-100 flex flex-col gap-2 items-center text-center">
+                       <span className="font-black text-blue-500 uppercase tracking-widest text-[10px]">PROTOCOL STATUS</span>
+                       <span className="font-black text-blue-900 text-xl">{item.protocolStatus || 'בטיפול'}</span>
+                    </div>
+                    <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col gap-2 items-center text-center col-span-1 lg:col-span-2 overflow-hidden">
+                        <span className="font-black text-indigo-500 uppercase tracking-widest text-[10px]">LINK / RESOURCES</span>
+                        {item.link ? (
+                            <a href={item.link.startsWith('http') ? item.link : `https://${item.link}`} target="_blank" rel="noopener noreferrer" className="font-black text-blue-700 text-lg hover:underline truncate w-full">
+                                {item.link}
+                            </a>
+                        ) : (
+                            <span className="font-black text-slate-300 text-lg italic">אין לינק זמין</span>
+                        )}
+                    </div>
+                 </div>
+              </div>
             )}
           </div>
         );

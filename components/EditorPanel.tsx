@@ -205,7 +205,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
                             <label className="text-xs font-black text-indigo-600 block border-b pb-2 uppercase tracking-widest">ניהול ממצאים</label>
                             <button onClick={() => {
                                 const items = [...(selectedSection as AnomalySection).items];
-                                items.push({ id: `an-${Date.now()}`, title: 'ממצא חדש', department: 'כללי', status: 'בטיפול', riskLevel: 3, riskAnalysis: '', detailedReport: '', internalRef: 'REF-' + Math.floor(Math.random()*100), protocolStatus: 'פתוח' });
+                                items.push({ id: `an-${Date.now()}`, title: 'ממצא חדש', department: 'גורם מבוקר חדש', status: 'בטיפול', riskLevel: 3, riskAnalysis: '', detailedReport: '', internalRef: 'REF-' + Math.floor(Math.random()*100), protocolStatus: 'פתוח', link: '' });
                                 updateSection(selectedId!, { items });
                             }} className="w-full py-4 bg-[#002d72] text-white rounded-2xl font-black text-xs shadow-lg">+ הוסף ממצא חדש לרשימה</button>
                             
@@ -223,14 +223,42 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
                                             const items = [...(selectedSection as AnomalySection).items]; items[idx].title = e.target.value; updateSection(selectedId!, { items });
                                         }} className="w-full p-3 border rounded-xl font-bold text-sm" placeholder="כותרת הממצא" />
                                         <div className="grid grid-cols-2 gap-3">
-                                            <input type="text" value={item.department} onChange={e => { const items = [...(selectedSection as AnomalySection).items]; items[idx].department = e.target.value; updateSection(selectedId!, { items }); }} className="w-full p-2 border rounded-lg text-xs font-bold" placeholder="חטיבה" />
-                                            <input type="number" min="1" max="5" value={item.riskLevel} onChange={e => { const items = [...(selectedSection as AnomalySection).items]; items[idx].riskLevel = parseInt(e.target.value); updateSection(selectedId!, { items }); }} className="w-full p-2 border rounded-lg text-xs font-bold text-rose-600 text-center" />
+                                            <div className="space-y-1">
+                                              <label className="text-[10px] font-bold text-slate-400">גורם מבוקר</label>
+                                              <input type="text" value={item.department} onChange={e => { const items = [...(selectedSection as AnomalySection).items]; items[idx].department = e.target.value; updateSection(selectedId!, { items }); }} className="w-full p-2 border rounded-lg text-xs font-bold" placeholder="גורם מבוקר" />
+                                            </div>
+                                            <div className="space-y-1">
+                                              <label className="text-[10px] font-bold text-slate-400">רמת סיכון (1-5)</label>
+                                              <input type="number" min="1" max="5" value={item.riskLevel} onChange={e => { const items = [...(selectedSection as AnomalySection).items]; items[idx].riskLevel = parseInt(e.target.value); updateSection(selectedId!, { items }); }} className="w-full p-2 border rounded-lg text-xs font-bold text-rose-600 text-center" />
+                                            </div>
                                         </div>
-                                        <textarea value={item.detailedReport} onChange={e => { const items = [...(selectedSection as AnomalySection).items]; items[idx].detailedReport = e.target.value; updateSection(selectedId!, { items }); }} className="w-full p-3 border rounded-xl text-[10px] h-20" placeholder="פירוט הממצא..." />
-                                        <textarea value={item.riskAnalysis} onChange={e => { const items = [...(selectedSection as AnomalySection).items]; items[idx].riskAnalysis = e.target.value; updateSection(selectedId!, { items }); }} className="w-full p-3 border rounded-xl text-[10px] h-20 bg-rose-50/30" placeholder="ניתוח סיכונים..." />
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-bold text-slate-400 uppercase">Detailed Anomaly Report</label>
+                                            <textarea value={item.detailedReport} onChange={e => { const items = [...(selectedSection as AnomalySection).items]; items[idx].detailedReport = e.target.value; updateSection(selectedId!, { items }); }} className="w-full p-3 border rounded-xl text-[10px] h-24" placeholder="פירוט הממצא המלא..." />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-bold text-slate-400 uppercase">Risk Factor Analysis</label>
+                                            <textarea value={item.riskAnalysis} onChange={e => { const items = [...(selectedSection as AnomalySection).items]; items[idx].riskAnalysis = e.target.value; updateSection(selectedId!, { items }); }} className="w-full p-3 border rounded-xl text-[10px] h-24 bg-rose-50/30" placeholder="ניתוח סיכונים..." />
+                                        </div>
                                         <div className="grid grid-cols-2 gap-3">
-                                            <input type="text" value={item.status} onChange={e => { const items = [...(selectedSection as AnomalySection).items]; items[idx].status = e.target.value; updateSection(selectedId!, { items }); }} className="w-full p-2 border rounded-lg text-xs font-bold" placeholder="סטטוס" />
-                                            <input type="text" value={item.internalRef} onChange={e => { const items = [...(selectedSection as AnomalySection).items]; items[idx].internalRef = e.target.value; updateSection(selectedId!, { items }); }} className="w-full p-2 border rounded-lg text-xs font-bold" placeholder="רפרנס" />
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] font-bold text-slate-400">סטטוס</label>
+                                                <input type="text" value={item.status} onChange={e => { const items = [...(selectedSection as AnomalySection).items]; items[idx].status = e.target.value; updateSection(selectedId!, { items }); }} className="w-full p-2 border rounded-lg text-xs font-bold" placeholder="סטטוס" />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] font-bold text-slate-400">רפרנס פנימי</label>
+                                                <input type="text" value={item.internalRef} onChange={e => { const items = [...(selectedSection as AnomalySection).items]; items[idx].internalRef = e.target.value; updateSection(selectedId!, { items }); }} className="w-full p-2 border rounded-lg text-xs font-bold" placeholder="רפרנס" />
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] font-bold text-slate-400">סטטוס פרוטוקול</label>
+                                                <input type="text" value={item.protocolStatus} onChange={e => { const items = [...(selectedSection as AnomalySection).items]; items[idx].protocolStatus = e.target.value; updateSection(selectedId!, { items }); }} className="w-full p-2 border rounded-lg text-xs font-bold" placeholder="סטטוס פרוטוקול" />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] font-bold text-slate-400">קישור חיצוני</label>
+                                                <input type="text" value={item.link || ''} onChange={e => { const items = [...(selectedSection as AnomalySection).items]; items[idx].link = e.target.value; updateSection(selectedId!, { items }); }} className="w-full p-2 border rounded-lg text-xs font-bold text-indigo-600" placeholder="URL מלא..." />
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
@@ -254,7 +282,7 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
                                     </div>
                                 </div>
                             ))}
-                            <button onClick={() => updateSection(selectedId!, { metrics: [...(selectedSection as KPISection).metrics, { label: 'חדש', value: '0' }] })} className="w-full py-3 border-2 border-dashed border-indigo-200 text-indigo-600 rounded-xl font-black text-[10px]">+ הוסף מדד KPI</button>
+                            <button onClick={() => updateSection(selectedId!, { metrics: [...(selectedSection as KPISection).metrics, { label: 'מדד חדש', value: '0' }] })} className="w-full py-3 border-2 border-dashed border-indigo-200 text-indigo-600 rounded-xl font-black text-[10px]">+ הוסף מדד KPI</button>
                         </div>
                     )}
 
