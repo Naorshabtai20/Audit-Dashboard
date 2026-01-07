@@ -43,10 +43,9 @@ const Card: React.FC<{
         {onDelete && (
           <button
             onClick={(e) => { e.stopPropagation(); onDelete(); }}
-            aria-label="Delete section"
-            className="absolute top-2 right-2 w-5 h-5 bg-rose-500 text-white rounded-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-rose-600 z-[70] border border-white/60"
+            className="absolute top-2 right-2 w-6 h-6 bg-rose-500 text-white rounded flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-rose-600 z-[70] shadow-lg border border-white"
           >
-            <span className="text-[9px] font-extrabold leading-none">×</span>
+            <span className="text-[10px] font-bold">✕</span>
           </button>
         )}
 
@@ -303,7 +302,7 @@ export const SectionPreview: React.FC<{
         type={section.type}
       >
         <div className="flex flex-col h-full w-full" style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}>
-          {section.title && !['date', 'anomaly', 'graphic'].includes(section.type) && (
+          {section.title && !['date', 'graphic'].includes(section.type) && (
             <h2
               className={`tracking-tighter leading-tight border-r-4 border-[#002d72] pr-4 font-black shrink-0 text-right`}
               style={{

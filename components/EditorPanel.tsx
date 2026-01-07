@@ -139,137 +139,211 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
 
   const appliedWidth = width ? `${width}px` : undefined;
 
+  // splitter drag state (a dedicated handle will control resizing)
+  const draggingRef = useRef(false);
+  const dragStartX = useRef(0);
+  const dragStartWidth = useRef<number>(width ?? 420);
+
+  const clampWidth = (w: number) => Math.max(200, Math.min(w, window.innerWidth - 200));
+
+  useEffect(() =>
+  {
+    const onMove = (e: MouseEvent) =>
+    {
+      if (!draggingRef.current) return;
+      const clientX = e.clientX;
+      const delta = dragStartX.current - clientX; // panel on right: moving left (clientX down) increases width
+      const newW = clampWidth(dragStartWidth.current + delta);
+      setWidth(newW);
+      onSidebarWidthChange?.(newW);
+    };
+    const onUp = () => { if (draggingRef.current) { draggingRef.current = false; document.body.style.userSelect = ''; } };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    window.addEventListener('mouseleave', onUp);
+    return () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); window.removeEventListener('mouseleave', onUp); };
+  }, [onSidebarWidthChange]);
+
   return (
-    <div style={{ width: appliedWidth }} className="flex-none flex flex-col h-full bg-white border-l border-slate-200 shadow-xl" dir="rtl">
+    <div style={{ width: appliedWidth }} className="relative flex-none flex flex-col h-full bg-white border-l border-slate-200 shadow-xl" dir="rtl">
       <div className="h-20 bg-[#002d72] text-white flex justify-between items-center shrink-0 relative">
         <div>
           <h2 className="text-2xl font-black text-white tracking-tight">מעצב הדו"ח</h2>
         </div>
-        {/* Editor no longer shows its own visible separator; resizing is handled by App */}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 custom-scrollbar">
-        {/* Current tab + dropdown with full tab management */}
-        <div className="space-y-3">
-          <div ref={tabsRef} className="relative">
-            <button onClick={() => setTabsOpen(s => !s)} className={`w-full p-4 rounded-2xl border-2 flex items-center justify-between text-right transition-all ${'bg-white border-transparent hover:border-slate-100 shadow-sm'}`}>
-              <div className="flex items-center gap-3">
-                <span className="text-2xl opacity-40">{(tabs[activeTabIndex] && tabs[activeTabIndex].icon) || '📄'}</span>
-                <div>
-                  <p className="font-black text-sm leading-none mb-1 text-slate-700">{(tabs[activeTabIndex] && tabs[activeTabIndex].title) || 'טאב נוכחי'}</p>
-                  <p className="text-[10px] text-slate-400">{(tabs[activeTabIndex] && (tabs[activeTabIndex].sections || []).length) || 0} פריטים</p>
-                </div>
-              </div>
-            </button>
+      {/* Resize handle placed further outside the editor so it doesn't overlap the editor scrollbar */}
+      <div className="absolute -left-12 top-0 bottom-0 w-12 z-50 pointer-events-none">
+        <div
+          className="absolute left-0 top-0 bottom-0 w-12 cursor-col-resize flex items-center justify-center pointer-events-auto"
+          onMouseDown={(e) =>
+          {
+            e.stopPropagation();
+            e.preventDefault();
+            draggingRef.current = true;
+            dragStartX.current = e.clientX;
+            dragStartWidth.current = width ?? 420;
+            // prevent text selection while dragging
+            document.body.style.userSelect = 'none';
+          }}
+          onTouchStart={(e) =>
+          {
+            const t = e.touches && e.touches[0];
+            if (!t) return;
+            e.stopPropagation();
+            // prevent page scroll while starting drag
+            e.preventDefault();
+            draggingRef.current = true;
+            dragStartX.current = t.clientX;
+            dragStartWidth.current = width ?? 420;
+            document.body.style.userSelect = 'none';
+          }}
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="Resize editor panel"
+          title="גרור לשינוי רוחב"
+        >
+          {/* visual bar so users can see the handle */}
+          <div className="w-px h-full bg-slate-200 rounded-sm pointer-events-none"></div>
+          {/* subtle grip marks */}
+          <div className="absolute left-1/2 transform -translate-x-1/2 flex flex-col gap-1 pointer-events-none">
+            <span className="block w-px h-6 bg-slate-400 opacity-60"></span>
+            <span className="block w-px h-6 bg-slate-400 opacity-30"></span>
+          </div>
+        </div>
+      </div>
 
-            {tabsOpen && (
-              <div className="absolute mt-2 right-0 left-0 z-50 bg-white border rounded-2xl shadow-lg p-3">
-                <div className="flex flex-col gap-2">
-                  {tabs.map((t, idx) => (
-                    <div
-                      key={idx}
-                      draggable
-                      onDragStart={() => setDragIndex(idx)}
-                      onDragOver={(e) => { e.preventDefault(); }}
-                      onDrop={() => { if (dragIndex !== null && dragIndex !== idx) { onMoveTab?.(dragIndex, idx); setDragIndex(null); } }}
-                      onClick={() => { onSelect(null); onSelectTab?.(idx); setTabsOpen(false); }}
-                      className={`group flex items-center justify-between p-2 rounded hover:bg-slate-50 cursor-pointer ${dragIndex === idx ? 'opacity-50' : ''}`}
-                    >
-                      <div className="flex items-center gap-3">
-                        {/* Improved tab icon – circular badge with primary color (shown on hover) */}
-                        <span className="flex items-center justify-center w-6 h-6 rounded-full text-white text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-150">{(t.icon && t.icon.length <= 2) ? t.icon : (t.title || 'T').charAt(0)}</span>
-                        <div className="text-right">
-                          <div className="font-black text-sm">{t.title || `טאב ${idx + 1}`}</div>
-                          <div className="text-[10px] text-slate-400">{(t.sections || []).length} פריטים</div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-150">
-                        {/* Edit icon – use same gear icon as tab settings */}
-                        <button onClick={(e) => { e.stopPropagation(); onSelectTab?.(idx); onSelect('tab-settings'); setTabsOpen(false); }} className="w-6 h-6 flex items-center justify-center bg-white border rounded text-xs">⚙️</button>
-                        {/* Delete icon – smaller, matching view area (no confirmation) */}
-                        <button onClick={(e) => { e.stopPropagation(); onDeleteTab?.(idx); }} aria-label="מחק טאב" className="w-6 h-6 flex items-center justify-center bg-rose-500 text-white rounded text-xs">×</button>
-                      </div>
-                    </div>
-                  ))}
-
-                  <div className="pt-2 border-t mt-2">
-                    <button onClick={() =>
-                    {
-                      // Request parent to add a new tab, then select it and open its settings
-                      onAddTab?.();
-                      const newIndex = tabs.length; // assume new tab is appended
-                      onSelectTab?.(newIndex);
-                      onSelect('tab-settings');
-                      setTabsOpen(false);
-                    }} className="w-full p-3 rounded-2xl border-2 border-dashed border-slate-200 bg-white/50 text-slate-600 font-black hover:bg-[#002d72] hover:text-white transition-all">+ הוסף טאב</button>
+      {/**
+       * When a section (or tab-settings) is selected we want the editor to fill the
+       * available panel space. When nothing is selected we show the sections list.
+       */}
+      {!(selectedSection || selectedId === 'tab-settings') ? (
+        <div style={{ touchAction: 'pan-y', overscrollBehavior: 'contain' }} className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 custom-scrollbar">
+          {/* Current tab + dropdown with full tab management */}
+          <div className="space-y-3">
+            <div ref={tabsRef} className="relative">
+              <button onClick={() => setTabsOpen(s => !s)} className={`w-full p-4 rounded-2xl border-2 flex items-center justify-between text-right transition-all ${'bg-white border-transparent hover:border-slate-100 shadow-sm'}`}>
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl opacity-40">{(tabs[activeTabIndex] && tabs[activeTabIndex].icon) || '📄'}</span>
+                  <div>
+                    <p className="font-black text-sm leading-none mb-1 text-slate-700">{(tabs[activeTabIndex] && tabs[activeTabIndex].title) || 'טאב נוכחי'}</p>
+                    <p className="text-[10px] text-slate-400">{(tabs[activeTabIndex] && (tabs[activeTabIndex].sections || []).length) || 0} פריטים</p>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
-        </div>
+              </button>
 
-        {sections.map((sec: any, idx: number) => (
-          <div
-            key={sec.id}
-            className="relative group"
-            draggable
-            onDragStart={(e) => { setSectionDragIndex(idx); e.dataTransfer?.setData('text/plain', String(idx)); }}
-            onDragOver={(e) => { e.preventDefault(); }}
-            onDrop={(e) => { e.preventDefault(); if (sectionDragIndex !== null && sectionDragIndex !== idx) { const newSections = [...sections]; const [moved] = newSections.splice(sectionDragIndex, 1); newSections.splice(idx, 0, moved); onUpdate({ ...report, sections: newSections }); setSectionDragIndex(null); } }}
-            onDragEnd={() => setSectionDragIndex(null)}
-          >
-            <button onClick={() => onSelect(sec.id)} className={`w-full p-4 rounded-2xl border-2 flex items-center justify-between text-right transition-all ${selectedId === sec.id ? 'border-[#002d72] bg-white shadow-lg' : 'bg-white border-transparent hover:border-slate-100 shadow-sm'} ${sectionDragIndex === idx ? 'opacity-50' : ''}`}>
-              <div className="flex items-center gap-3">
-                <span className="text-2xl opacity-40">{SECTION_OPTIONS.find(o => o.type === sec.type)?.icon}</span>
-                <div><p className={`font-black text-sm leading-none mb-1 ${selectedId === sec.id ? 'text-[#002d72]' : 'text-slate-700'}`}>{sec.title || 'ללא כותרת'}</p><p className="text-[10px] text-slate-400">{sec.type.toUpperCase()}</p></div>
-              </div>
-            </button>
-            <button
-              onClick={(e) => { e.stopPropagation(); onUpdate({ ...report, sections: sections.filter((s: any) => s.id !== sec.id) }); onSelect(null); }}
-              aria-label="מחק אובייקט"
-              className="absolute top-2 left-2 w-6 h-6 bg-rose-500 text-white rounded flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none group-hover:pointer-events-auto text-xs"
+              {tabsOpen && (
+                <div className="absolute mt-2 right-0 left-0 z-50 bg-white border rounded-2xl shadow-lg p-3">
+                  <div className="flex flex-col gap-2">
+                    {tabs.map((t, idx) => (
+                      <div
+                        key={idx}
+                        draggable
+                        onDragStart={() => setDragIndex(idx)}
+                        onDragOver={(e) => { e.preventDefault(); }}
+                        onDrop={() => { if (dragIndex !== null && dragIndex !== idx) { onMoveTab?.(dragIndex, idx); setDragIndex(null); } }}
+                        onClick={() => { onSelect(null); onSelectTab?.(idx); setTabsOpen(false); }}
+                        className={`group flex items-center justify-between p-2 rounded hover:bg-slate-50 cursor-pointer ${dragIndex === idx ? 'opacity-50' : ''}`}
+                      >
+                        <div className="flex items-center gap-3">
+                          {/* Improved tab icon – circular badge with primary color (shown on hover) */}
+                          <span className="flex items-center justify-center w-6 h-6 rounded-full text-white text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-150">{(t.icon && t.icon.length <= 2) ? t.icon : (t.title || 'T').charAt(0)}</span>
+                          <div className="text-right">
+                            <div className="font-black text-sm">{t.title || `טאב ${idx + 1}`}</div>
+                            <div className="text-[10px] text-slate-400">{(t.sections || []).length} פריטים</div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-150">
+                          {/* Edit icon – use same gear icon as tab settings */}
+                          <button onClick={(e) => { e.stopPropagation(); onSelectTab?.(idx); onSelect('tab-settings'); setTabsOpen(false); }} className="w-6 h-6 flex items-center justify-center bg-white border rounded text-xs">⚙️</button>
+                          {/* Delete icon – small red trash icon (red color only) */}
+                          <button onClick={(e) => { e.stopPropagation(); onDeleteTab?.(idx); }} aria-label="מחק טאב" className="w-6 h-6 flex items-center justify-center bg-white text-rose-500 rounded text-xs hover:bg-slate-50 border border-slate-200">🗑️</button>
+                        </div>
+                      </div>
+                    ))}
+
+                    <div className="pt-2 border-t mt-2">
+                      <button onClick={() =>
+                      {
+                        // Request parent to add a new tab, then select it and open its settings
+                        onAddTab?.();
+                        const newIndex = tabs.length; // assume new tab is appended
+                        onSelectTab?.(newIndex);
+                        onSelect('tab-settings');
+                        setTabsOpen(false);
+                      }} className="w-full p-3 rounded-2xl border-2 border-dashed border-slate-200 bg-white/50 text-slate-600 font-black hover:bg-[#002d72] hover:text-white transition-all">+ הוסף טאב</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {sections.map((sec: any, idx: number) => (
+            <div
+              key={sec.id}
+              className="relative group"
+              draggable
+              onDragStart={(e) => { setSectionDragIndex(idx); e.dataTransfer?.setData('text/plain', String(idx)); }}
+              onDragOver={(e) => { e.preventDefault(); }}
+              onDrop={(e) => { e.preventDefault(); if (sectionDragIndex !== null && sectionDragIndex !== idx) { const newSections = [...sections]; const [moved] = newSections.splice(sectionDragIndex, 1); newSections.splice(idx, 0, moved); onUpdate({ ...report, sections: newSections }); setSectionDragIndex(null); } }}
+              onDragEnd={() => setSectionDragIndex(null)}
             >
-              ×
-            </button>
-          </div>
-        ))}
-
-        <div className="grid grid-cols-2 gap-3 mt-6 pt-6 border-t border-slate-200">
-          {SECTION_OPTIONS.map(opt => (
-            <button key={opt.type} onClick={() =>
-            {
-              const id = `sec-${Date.now()}`;
-              const newSec = {
-                id, type: opt.type, title: opt.label,
-                styles: { colSpan: 12, height: (opt.type === 'chart' || opt.type === 'graphic') ? 400 : undefined, fontScale: 1, dataFontScale: 1, labelFontScale: 1, alignment: 'right' },
-                ...(opt.type === 'summary_evaluation' ? { briefingText: 'הזן סיכום...', score: 5, scoreLabel: 'תקין', recommendations: ['המלצה 1'], deficiencies: ['ליקוי 1'] } : {}),
-                ...(opt.type === 'kpi' ? { metrics: [{ label: 'מדד חדש', value: '0' }] } : {}),
-                ...(opt.type === 'anomaly' ? { items: [{ id: `an-${Date.now()}`, title: 'ממצא חדש', department: 'גורם מבוקר חדש', status: 'בטיפול', riskLevel: 3, riskAnalysis: '', detailedReport: '', internalRef: 'REF-' + Math.floor(Math.random() * 100), protocolStatus: 'פתוח', link: '' }] } : {}),
-                ...(opt.type === 'chart' ? { chartKind: 'bar', data: [{ x: 'א', y: 10 }], xKey: 'x', seriesKeys: ['y'] } : {}),
-                ...(opt.type === 'table' ? { headers: ['עמודה 1'], rows: [['נתון 1']] } : {}),
-                ...(opt.type === 'text' ? { content: 'טקסט חדש...' } : {}),
-                ...(opt.type === 'date' ? { date: new Date().toISOString().split('T')[0], label: 'תאריך הדו"ח' } : {}),
-                ...(opt.type === 'graphic' ? { src: '' } : {})
-              };
-              onUpdate({ ...report, sections: [...sections, newSec] });
-              onSelect(id);
-            }} className="flex flex-col items-center gap-2 p-4 bg-white border border-slate-100 rounded-2xl hover:bg-[#002d72] hover:text-white transition-all text-xs font-bold shadow-sm">
-              <span className="text-2xl">{opt.icon}</span> {opt.label}
-            </button>
+              <button onClick={() => onSelect(sec.id)} className={`w-full p-4 rounded-2xl border-2 flex items-center justify-between text-right transition-all ${selectedId === sec.id ? 'border-[#002d72] bg-white shadow-lg' : 'bg-white border-transparent hover:border-slate-100 shadow-sm'} ${sectionDragIndex === idx ? 'opacity-50' : ''}`}>
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl opacity-40">{SECTION_OPTIONS.find(o => o.type === sec.type)?.icon}</span>
+                  <div><p className={`font-black text-sm leading-none mb-1 ${selectedId === sec.id ? 'text-[#002d72]' : 'text-slate-700'}`}>{sec.title || 'ללא כותרת'}</p><p className="text-[10px] text-slate-400">{sec.type.toUpperCase()}</p></div>
+                </div>
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); onUpdate({ ...report, sections: sections.filter((s: any) => s.id !== sec.id) }); onSelect(null); }}
+                aria-label="מחק אובייקט"
+                className="absolute top-2 left-2 w-6 h-6 bg-white text-rose-500 rounded flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none group-hover:pointer-events-auto text-xs hover:bg-slate-50 border border-slate-200"
+              >
+                🗑️
+              </button>
+            </div>
           ))}
+
+          <div className="grid grid-cols-2 gap-3 mt-6 pt-6 border-t border-slate-200">
+            {SECTION_OPTIONS.map(opt => (
+              <button key={opt.type} onClick={() =>
+              {
+                const id = `sec-${Date.now()}`;
+                const newSec = {
+                  id, type: opt.type, title: opt.label,
+                  styles: { colSpan: 12, height: (opt.type === 'chart' || opt.type === 'graphic') ? 400 : undefined, fontScale: 1, dataFontScale: 1, labelFontScale: 1, alignment: 'right' },
+                  ...(opt.type === 'summary_evaluation' ? { briefingText: 'הזן סיכום...', score: 5, scoreLabel: 'תקין', recommendations: ['המלצה 1'], deficiencies: ['ליקוי 1'] } : {}),
+                  ...(opt.type === 'kpi' ? { metrics: [{ label: 'מדד חדש', value: '0' }] } : {}),
+                  ...(opt.type === 'anomaly' ? { items: [{ id: `an-${Date.now()}`, title: 'ממצא חדש', department: 'גורם מבוקר חדש', status: 'בטיפול', riskLevel: 3, riskAnalysis: '', detailedReport: '', internalRef: 'REF-' + Math.floor(Math.random() * 100), protocolStatus: 'פתוח', link: '' }] } : {}),
+                  ...(opt.type === 'chart' ? { chartKind: 'bar', data: [{ x: 'א', y: 10 }], xKey: 'x', seriesKeys: ['y'] } : {}),
+                  ...(opt.type === 'table' ? { headers: ['עמודה 1'], rows: [['נתון 1']] } : {}),
+                  ...(opt.type === 'text' ? { content: 'טקסט חדש...' } : {}),
+                  ...(opt.type === 'date' ? { date: new Date().toISOString().split('T')[0], label: 'תאריך הדו"ח' } : {}),
+                  ...(opt.type === 'graphic' ? { src: '' } : {})
+                };
+                onUpdate({ ...report, sections: [...sections, newSec] });
+                onSelect(id);
+              }} className="flex flex-col items-center gap-2 p-4 bg-white border border-slate-100 rounded-2xl hover:bg-[#002d72] hover:text-white transition-all text-xs font-bold shadow-sm">
+                <span className="text-2xl">{opt.icon}</span> {opt.label}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      ) : null}
 
       {(selectedSection || selectedId === 'tab-settings') && (
-        <div className="h-[75%] border-t bg-white p-8 overflow-y-auto shadow-2xl z-50 custom-scrollbar animate-in slide-in-from-bottom duration-300 text-right">
-          <div className="flex justify-between items-center mb-8 border-b pb-6 sticky top-0 bg-white z-[60]">
-            <h3 className="text-xl font-black text-[#002d72]">{selectedId === 'tab-settings' ? 'הגדרות טאב' : `עריכת ${SECTION_OPTIONS.find(o => o.type === selectedSection?.type)?.label}`}</h3>
-            <button onClick={() => onSelect(null)} className="text-slate-300 font-bold hover:text-slate-600">סגור</button>
+        <div style={{ touchAction: 'pan-y', overscrollBehavior: 'contain' }} className="flex-1 border-t bg-white overflow-y-auto shadow-2xl z-50 custom-scrollbar animate-in slide-in-from-bottom duration-300 text-right">
+          {/* Header spans full width of the editor panel */}
+          <div className="sticky top-0 bg-white z-[60] w-full border-b">
+            <div className="flex justify-between items-center p-4">
+              <h3 className="text-xl font-black text-[#002d72]">{selectedId === 'tab-settings' ? 'הגדרות טאב' : `עריכת ${SECTION_OPTIONS.find(o => o.type === selectedSection?.type)?.label}`}</h3>
+              <button onClick={() => onSelect(null)} aria-label="Close editor" className="w-6 h-6 bg-rose-500 text-white rounded flex items-center justify-center font-bold hover:bg-rose-600 border border-slate-200">×</button>
+            </div>
           </div>
 
-          <div className="space-y-10 pb-32">
+          <div className="p-4 space-y-8 pb-24">
             {selectedId === 'tab-settings' ? (
               <div className="space-y-6">
                 <div className="space-y-2"><label className="text-xs font-black text-slate-400">אייקון</label><input type="text" value={report.tabIcon || ''} onChange={e => onUpdate({ ...report, tabIcon: e.target.value })} className="w-full p-4 border rounded-2xl font-bold text-2xl text-center" /></div>
@@ -351,9 +425,9 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
                                 updateSection(selectedId!, { items });
                               }}
                               aria-label={`מחק ממצא ${idx + 1}`}
-                              className="w-6 h-6 bg-rose-500 text-white rounded flex items-center justify-center text-xs font-extrabold"
+                              className="w-6 h-6 bg-white text-rose-500 rounded flex items-center justify-center text-xs font-extrabold border border-slate-200"
                             >
-                              ×
+                              🗑️
                             </button>
                           </div>
                           <input type="text" value={item.title} onChange={e =>
@@ -416,9 +490,9 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
                             updateSection(selectedId!, { metrics });
                           }}
                           aria-label="מחק מדד"
-                          className="absolute top-2 left-2 w-6 h-6 bg-white text-rose-500 rounded flex items-center justify-center border border-rose-100 text-xs font-extrabold shadow-sm"
+                          className="absolute top-2 left-2 w-6 h-6 bg-white text-rose-500 rounded flex items-center justify-center border border-slate-200 text-xs font-extrabold shadow-sm"
                         >
-                          ×
+                          🗑️
                         </button>
                         <input type="text" value={m.label} onChange={e => { const metrics = [...(selectedSection as KPISection).metrics]; metrics[idx].label = e.target.value; updateSection(selectedId!, { metrics }); }} className="w-full p-2 border rounded-lg font-bold text-xs" placeholder="שם המדד" />
                         <div className="grid grid-cols-2 gap-2">
@@ -457,9 +531,9 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
                               const recs = (selectedSection as SummaryEvaluationSection).recommendations.filter((_, i) => i !== idx); updateSection(selectedId!, { recommendations: recs });
                             }}
                             aria-label={`מחק המלצה ${idx + 1}`}
-                            className="w-6 h-6 bg-rose-500 text-white rounded flex items-center justify-center text-xs font-extrabold"
+                            className="w-6 h-6 bg-white text-rose-500 rounded flex items-center justify-center text-xs font-extrabold border border-slate-200"
                           >
-                            ×
+                            🗑️
                           </button>
                         </div>
                       ))}
@@ -480,9 +554,9 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
                               const defs = (selectedSection as SummaryEvaluationSection).deficiencies.filter((_, i) => i !== idx); updateSection(selectedId!, { deficiencies: defs });
                             }}
                             aria-label={`מחק ליקוי ${idx + 1}`}
-                            className="w-6 h-6 bg-rose-500 text-white rounded flex items-center justify-center text-xs font-extrabold"
+                            className="w-6 h-6 bg-white text-rose-500 rounded flex items-center justify-center text-xs font-extrabold border border-slate-200"
                           >
-                            ×
+                            🗑️
                           </button>
                         </div>
                       ))}
@@ -590,8 +664,6 @@ export const EditorPanel: React.FC<EditorPanelProps> = ({ report, onUpdate, sele
                     </div>
                   </div>
                 )}
-
-                <button onClick={() => { onUpdate({ ...report, sections: sections.filter((s: any) => s.id !== selectedId) }); onSelect(null); }} className="w-full py-6 bg-rose-50 text-rose-600 font-black rounded-[2.5rem] border-2 border-rose-100 hover:bg-rose-600 hover:text-white transition-all shadow-md mt-10">מחיקת אובייקט מהדו"ח ×</button>
               </>
             )}
           </div>
