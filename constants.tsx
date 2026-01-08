@@ -50,3 +50,6 @@ export const INITIAL_REPORT: Report = {
         }
     ]
 };
+
+const _envService = (import.meta as any)?.env?.VITE_SERVICE_URL || '';
+export const SERVICE_URL = _envService || 'http://localhost:3001/api/reports/';

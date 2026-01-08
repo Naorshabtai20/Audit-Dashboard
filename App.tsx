@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Report, Section, ReportTab } from './types';
-import { INITIAL_REPORT } from './constants';
+import { INITIAL_REPORT, SERVICE_URL } from './constants';
 import { EditorPanel } from './components/EditorPanel';
 import { SectionPreview } from './components/SectionPreview';
 
@@ -29,6 +29,7 @@ const App: React.FC = () =>
 
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [resourceId, setResourceId] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showJsonModal, setShowJsonModal] = useState(false);
   const [draggedId, setDraggedId] = useState<string | null>(null);
@@ -59,6 +60,91 @@ const App: React.FC = () =>
     }, 500);
     return () => clearTimeout(timer);
   }, [report]);
+
+  // Read optional id from query string and load remote report if configured
+  useEffect(() =>
+  {
+    try
+    {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      if (!id) return;
+      setResourceId(id);
+      if (!SERVICE_URL) return;
+      setSaveStatus('saving');
+      const url = `${SERVICE_URL.replace(/\/$/, '')}/${encodeURIComponent(id)}`;
+      fetch(url, { method: 'GET' })
+        .then(async res =>
+        {
+          if (!res.ok) throw new Error(`Failed to fetch (${res.status})`);
+          return res.json();
+        })
+        .then(data =>
+        {
+          // Accept full report or just { sections: [...] }
+          if (data && data.tabs) setReport(data as Report);
+          else if (data && data.sections) setReport({ tabs: [{ title: 'טעון מרחוק', icon: '☁️', sections: data.sections }] });
+          else setReport(data as Report);
+        })
+        .catch(err =>
+        {
+          console.error('Remote load error', err);
+          alert('טעינת הדו"ח מרחוק נכשלה: ' + err.message);
+        })
+        .finally(() => setSaveStatus('saved'));
+    } catch (e) { console.error(e); }
+  }, []);
+
+  const handleSaveRemote = async () =>
+  {
+    if (!SERVICE_URL)
+    {
+      return;
+    }
+
+    let idToUse = resourceId;
+
+    if (!idToUse)
+    {
+      // prompt for id in Hebrew
+      const input = prompt('הכנס מזהה לשמירה (אותיות לטיניות, ספרות, "-" או "_"):');
+
+      if (!input) return;
+      const valid = /^[A-Za-z0-9_-]+$/.test(input);
+      if (!valid)
+      {
+        alert('מזהה לא חוקי — השתמש רק באותיות לטיניות, ספרות, "-" או "_".');
+        return;
+      }
+      idToUse = input;
+      setResourceId(idToUse);
+      // update query string without reloading
+      try { const u = new URL(window.location.href); u.searchParams.set('id', idToUse); window.history.replaceState({}, '', u.toString()); } catch (e) { /* ignore */ }
+    }
+
+    try
+    {
+      setSaveStatus('saving');
+      const url = `${SERVICE_URL.replace(/\/$/, '')}/${encodeURIComponent(idToUse)}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(report),
+      });
+      if (!res.ok)
+      {
+        const txt = await res.text();
+        throw new Error(`שגיאה בשמירה: ${res.status} ${txt}`);
+      }
+      setSaveStatus('saved');
+      alert('נשמר בהצלחה לשירות המרוחק');
+    } catch (err: any)
+    {
+      console.error(err);
+      alert('שמירה נכשלת: ' + (err?.message || err));
+      setSaveStatus('idle');
+    }
+  };
 
   const activeTab = report.tabs[activeTabIndex] || report.tabs[0];
 
@@ -216,6 +302,12 @@ const App: React.FC = () =>
               <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-[11px] font-bold hover:bg-slate-50 transition-all shadow-sm" onClick={() => setShowJsonModal(true)}>JSON</button>
               <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-[11px] font-bold hover:bg-slate-50 transition-all shadow-sm" onClick={() => fileInputRef.current?.click()}>ייבוא</button>
               <button className="px-4 py-2 bg-rose-50 text-rose-600 rounded-xl text-[11px] font-bold hover:bg-rose-600 hover:text-white transition-all" onClick={handleResetReport}>נקה הכל</button>
+              {/* Save to remote service when id provided and SERVICE_URL configured */}
+              <button
+                hidden={!SERVICE_URL}
+                onClick={handleSaveRemote}
+                className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-[11px] font-bold hover:bg-slate-50 transition-all shadow-sm"
+              >שמור</button>
             </>
           )}
           <button className="px-6 py-2 bg-[#002d72] text-white rounded-xl text-[11px] font-bold shadow-xl hover:bg-blue-600 transition-all" onClick={handleExport}>ייצוא לקובץ</button>
