@@ -7,10 +7,20 @@ import { SectionPreview } from './components/SectionPreview';
 
 const STORAGE_KEY = 'offline_report_data_v2';
 
+// If a global `report` is injected (see `index.html`), open it in view-only mode
+const GLOBAL_REPORT = (window as any).report ?? null;
+const IS_GLOBAL_REPORT = GLOBAL_REPORT !== null && GLOBAL_REPORT !== undefined;
+
 const App: React.FC = () =>
 {
   const [report, setReport] = useState<Report>(() =>
   {
+    // If a global report is provided, use it directly (view-only)
+    if (IS_GLOBAL_REPORT)
+    {
+      try { return JSON.parse(JSON.stringify(GLOBAL_REPORT)) as Report; } catch (e) { return INITIAL_REPORT; }
+    }
+
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved)
     {
@@ -33,6 +43,7 @@ const App: React.FC = () =>
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showJsonModal, setShowJsonModal] = useState(false);
   const [draggedId, setDraggedId] = useState<string | null>(null);
+  // Default to edit mode; when a global report is provided we still allow editing but we don't save it
   const [editMode, setEditMode] = useState(true);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('saved');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -52,6 +63,9 @@ const App: React.FC = () =>
 
   useEffect(() =>
   {
+    // Do not save to localStorage when a global report is provided (view-only)
+    if (IS_GLOBAL_REPORT) return;
+
     setSaveStatus('saving');
     const timer = setTimeout(() =>
     {
@@ -64,6 +78,9 @@ const App: React.FC = () =>
   // Read optional id from query string and load remote report if configured
   useEffect(() =>
   {
+    // When a global report is provided, do not attempt remote loading from query params
+    if (IS_GLOBAL_REPORT) return;
+
     try
     {
       const params = new URLSearchParams(window.location.search);
@@ -210,6 +227,37 @@ const App: React.FC = () =>
     URL.revokeObjectURL(url);
   };
 
+  const isProd = !!(import.meta.env && (import.meta.env.MODE === 'production' || import.meta.env.PROD));
+
+  const handleExportHtml = () =>
+  {
+    try
+    {
+      // Serialize report and neutralize '<' to avoid closing script tags
+      const json = JSON.stringify(report).replace(/</g, '\\u003c');
+      const scriptTag = `<script>window.report = ${json};</script>`;
+
+      let html = '<!doctype html>\n' + document.documentElement.outerHTML;
+
+      // Replace any existing injected window.report script, otherwise insert before </head>
+      const re = /<script>[\s\S]*?window\.report[\s\S]*?<\/script>/i;
+      if (re.test(html)) html = html.replace(re, scriptTag);
+      else html = html.replace('</head>', `${scriptTag}</head>`);
+
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `report_page_${new Date().toISOString().slice(0, 10)}.html`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err: any)
+    {
+      console.error('HTML export failed', err);
+      alert('שגיאה ביצוא לעמוד HTML: ' + (err?.message || err));
+    }
+  };
+
   const handleResetReport = () =>
   {
     if (confirm('זה ימחק את כל הנתונים השמורים מקומית. להמשיך?'))
@@ -297,7 +345,7 @@ const App: React.FC = () =>
         </div>
 
         <div className="flex gap-2">
-          {editMode && (
+          {!IS_GLOBAL_REPORT && editMode && (
             <>
               <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-[11px] font-bold hover:bg-slate-50 transition-all shadow-sm" onClick={() => setShowJsonModal(true)}>JSON</button>
               <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-[11px] font-bold hover:bg-slate-50 transition-all shadow-sm" onClick={() => fileInputRef.current?.click()}>ייבוא</button>
@@ -310,7 +358,11 @@ const App: React.FC = () =>
               >שמור</button>
             </>
           )}
+          {/* Always allow exporting to JSON even when a global report is provided */}
           <button className="px-6 py-2 bg-[#002d72] text-white rounded-xl text-[11px] font-bold shadow-xl hover:bg-blue-600 transition-all" onClick={handleExport}>ייצוא לקובץ</button>
+          {isProd && (
+            <button className="px-6 py-2 bg-emerald-600 text-white rounded-xl text-[11px] font-bold shadow-xl hover:bg-emerald-500 transition-all" onClick={handleExportHtml}>ייצוא HTML</button>
+          )}
         </div>
       </header>
 
