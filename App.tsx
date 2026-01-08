@@ -40,7 +40,6 @@ const App: React.FC = () =>
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [resourceId, setResourceId] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [showJsonModal, setShowJsonModal] = useState(false);
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [editMode, setEditMode] = useState<boolean>(() => IS_GLOBAL_REPORT ? false : true);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('saved');
@@ -152,7 +151,6 @@ const App: React.FC = () =>
         throw new Error(`שגיאה בשמירה: ${res.status} ${txt}`);
       }
       setSaveStatus('saved');
-      alert('נשמר בהצלחה לשירות המרוחק');
     } catch (err: any)
     {
       console.error(err);
@@ -344,7 +342,6 @@ const App: React.FC = () =>
         <div className="flex gap-2">
           {editMode &&
             <>
-              <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-[11px] font-bold hover:bg-slate-50 transition-all shadow-sm" onClick={() => setShowJsonModal(true)}>JSON</button>
               <button className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-[11px] font-bold hover:bg-slate-50 transition-all shadow-sm" onClick={() => fileInputRef.current?.click()}>ייבוא</button>
               <button className="px-4 py-2 bg-rose-50 text-rose-600 rounded-xl text-[11px] font-bold hover:bg-rose-600 hover:text-white transition-all" onClick={handleResetReport}>נקה הכל</button>
               {!IS_GLOBAL_REPORT && editMode &&
@@ -381,20 +378,6 @@ const App: React.FC = () =>
           };
           reader.readAsText(file);
         }} />
-
-        {showJsonModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-md no-print">
-            <div className="bg-white w-full max-w-3xl max-h-[85vh] rounded-[3rem] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
-              <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                <h3 className="text-xl font-bold">קוד מקור (JSON)</h3>
-                <button onClick={() => setShowJsonModal(false)} aria-label="סגור" className="w-10 h-10 flex items-center justify-center bg-white border rounded-xl hover:bg-slate-50 transition-colors">×</button>
-              </div>
-              <div className="flex-1 overflow-auto p-8 bg-slate-950 font-mono text-xs ltr text-left" dir="ltr">
-                <pre className="text-emerald-400">{JSON.stringify(report, null, 2)}</pre>
-              </div>
-            </div>
-          </div>
-        )}
 
         <div className={`${(effectiveSidebarOpen || !editMode) ? '' : 'w-0'} relative transition-all duration-500 border-l bg-white shadow-2xl flex flex-col overflow-hidden shrink-0 no-print`} style={{ width: !editMode ? viewPanelWidth : undefined }} ref={viewPanelRef}>
           {/* Splitter handle: keep in the same place for both editor and viewer */}
