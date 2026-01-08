@@ -5,10 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>מערכת דוחות מקומית | Pro Dashboard</title>
-    <script>
-        // GLOBAL REPORT PLACEHOLDER. Will be replaced at build time if REPORT_JSON provided.
-        window.report = null;
-    </script>
+    <script role="global report">window.report = null;</script>
     <style>
         @import "tailwindcss";
 
@@ -76,7 +73,9 @@
 </head>
 
 <body class="overflow-hidden">
+    <!-- START ROOT -->
     <div id="root"></div>
+    <!-- END ROOT -->
     <script type="module" src="index.tsx"></script>
 </body>
 
