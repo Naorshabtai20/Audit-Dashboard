@@ -1,0 +1,719 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Audit Dashboard Report Schema",
+    "description": "Visual report layout schema. The JSON produced using this schema represents how the report will look visually in the Audit Dashboard: tabs with ordered sections (text blocks, charts, tables, KPI panels, anomaly lists, etc.). Top-level report content (business fields) should be placed inside appropriate sections. See the 'samples' folder for sample report instances.",
+    "type": "object",
+    "properties": {
+        "tabs": {
+            "type": "array",
+            "description": "Top-level tabs of the report. Each tab groups one or more sections that together compose the visual layout of the report.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "description": "Tab title shown in the UI. This is the primary label for the tab and should be concise and descriptive."
+                    },
+                    "icon": {
+                        "type": "string",
+                        "description": "Optional icon identifier for the tab. Use this to visually distinguish tabs. Example: 'dashboard', 'analytics', or 'report'.. Use this to visually distinguish tabs. Example: 'dashboard', 'analytics', or 'report'."
+                    },
+                    "subTitles": {
+                        "type": "string",
+                        "description": "Optional subtitle text shown under the tab title. Use this to provide additional context or clarification for the tab's purpose. Example: 'Overview of Q1 2026 Audit Findings'."
+                    },
+                    "sections": {
+                        "type": "array",
+                        "description": "Array of sections that render inside the tab. Sections define their own visual representation and content.",
+                        "items": {
+                            "$ref": "#/definitions/section"
+                        }
+                    }
+                },
+                "required": [
+                    "title",
+                    "sections"
+                ],
+                "additionalProperties": false
+            }
+        }
+    },
+    "required": [
+        "tabs"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "sectionBase": {
+            "type": "object",
+            "description": "Common base for all section types. 'id' and 'type' identify the section; 'title' and 'styles' influence visual header and layout.",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string",
+                    "description": "Title of the section, displayed as a header. This should be concise and descriptive of the section's content."
+                },
+                "visible": {
+                    "type": "boolean",
+                    "description": "Controls the visibility of the section. Set to 'false' to hide the section without removing it from the report. Defaults to 'true'."
+                },
+                "styles": {
+                    "$ref": "#/definitions/sectionStyles"
+                }
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": true
+        },
+        "sectionStyles": {
+            "type": "object",
+            "description": "Layout and visual styling hints for a section. These are renderer hints: colSpan maps to grid columns, fontScale controls header size, dataFontScale adjusts data text size, alignment controls text alignment, color/backgroundColor are CSS colors.",
+            "properties": {
+                "colSpan": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 12
+                },
+                "height": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "fontScale": {
+                    "type": "number",
+                    "minimum": 0.5,
+                    "maximum": 6.0
+                },
+                "dataFontScale": {
+                    "type": "number",
+                    "minimum": 0.5,
+                    "maximum": 5.0
+                },
+                "labelFontScale": {
+                    "type": "number",
+                    "minimum": 0.5,
+                    "maximum": 3.0
+                },
+                "alignment": {
+                    "type": "string",
+                    "enum": [
+                        "right",
+                        "center",
+                        "left"
+                    ]
+                },
+                "color": {
+                    "type": "string"
+                },
+                "backgroundColor": {
+                    "type": "string"
+                },
+                "showLegend": {
+                    "type": "boolean"
+                },
+                "showGrid": {
+                    "type": "boolean"
+                },
+                "fontWeight": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "textSection": {
+            "description": "Text section: renders a block of text. This section is used to provide narrative explanations, summaries, or detailed descriptions. Use 'content' for the displayed text; 'title' from sectionBase renders as a header. Styles control font sizing, alignment, and column span. This section is ideal for introducing topics, providing context, or explaining complex concepts in detail.",
+            "examples": [
+                {
+                    "id": "introduction",
+                    "type": "text",
+                    "title": "Audit Overview",
+                    "content": "This report provides a comprehensive overview of the audit findings for Q1 2026. The audit focused on compliance, security, and operational efficiency.",
+                    "styles": {
+                        "fontScale": 1.2,
+                        "alignment": "left",
+                        "colSpan": 12
+                    }
+                }
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/sectionBase"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "const": "text",
+                            "description": "Identifies the section as a text section. Must be set to 'text'."
+                        },
+                        "content": {
+                            "type": "string",
+                            "description": "The text content to be displayed in the section. This can include markdown formatting for emphasis, lists, or links."
+                        }
+                    },
+                    "required": [
+                        "content"
+                    ],
+                    "additionalProperties": true
+                }
+            ]
+        },
+        "graphicSection": {
+            "description": "Graphic section: displays an image, diagram, or other media referenced by 'src'. The 'title' is shown above the graphic, and styles control sizing, alignment, and visibility. This section is useful for visualizing concepts, workflows, or data that are better represented graphically than textually.",
+            "examples": [
+                {
+                    "id": "workflow_diagram",
+                    "type": "graphic",
+                    "title": "Audit Workflow",
+                    "src": "https://example.com/audit_workflow.png",
+                    "styles": {
+                        "colSpan": 6,
+                        "height": 300
+                    }
+                }
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/sectionBase"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "const": "graphic",
+                            "description": "Identifies the section as a graphic section. Must be set to 'graphic'."
+                        },
+                        "src": {
+                            "type": "string",
+                            "description": "The source URL or path to the image or media file to be displayed. This can be a local file path or a remote URL."
+                        }
+                    },
+                    "required": [
+                        "src"
+                    ],
+                    "additionalProperties": true
+                }
+            ]
+        },
+        "chartSection": {
+            "description": "Chart section: renders a visual chart to represent data trends, comparisons, or distributions. 'chartKind' chooses the chart type (e.g., line, bar, pie); 'data' is an array of objects representing the data points. 'xKey' and 'seriesKeys' map data fields to axes and series. Styles control legend visibility, grid lines, sizing, and color schemes. This section is ideal for visualizing quantitative data and identifying trends or patterns.",
+            "examples": [
+                {
+                    "id": "compliance_trends",
+                    "type": "chart",
+                    "title": "Compliance Trends (2025-2026)",
+                    "chartKind": "line",
+                    "data": [
+                        {
+                            "month": "Jan",
+                            "compliance_score": 85
+                        },
+                        {
+                            "month": "Feb",
+                            "compliance_score": 90
+                        },
+                        {
+                            "month": "Mar",
+                            "compliance_score": 95
+                        }
+                    ],
+                    "xKey": "month",
+                    "seriesKeys": [
+                        "compliance_score"
+                    ],
+                    "styles": {
+                        "colSpan": 8,
+                        "showLegend": true,
+                        "showGrid": true
+                    }
+                }
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/sectionBase"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "const": "chart",
+                            "description": "Identifies the section as a chart section. Must be set to 'chart'."
+                        },
+                        "chartKind": {
+                            "type": "string",
+                            "enum": [
+                                "line",
+                                "bar",
+                                "area",
+                                "pie",
+                                "donut",
+                                "radar"
+                            ],
+                            "description": "Specifies the type of chart to render. Options: 'line', 'bar', 'area', 'pie', 'donut', or 'radar'."
+                        },
+                        "data": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "description": "An array of objects where each object represents a data point. Each object should include keys for the x-axis and series values."
+                            }
+                        },
+                        "xKey": {
+                            "type": "string",
+                            "description": "The key in the data objects that maps to the x-axis of the chart. Example: 'month'."
+                        },
+                        "seriesKeys": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "description": "An array of keys in the data objects that map to the series values of the chart. Example: ['compliance_score', 'anomalies']."
+                        }
+                    },
+                    "required": [
+                        "chartKind",
+                        "data"
+                    ],
+                    "additionalProperties": true
+                }
+            ]
+        },
+        "tableSection": {
+            "description": "Table section: renders tabular data for structured presentation of detailed information. 'headers' are column names, and 'rows' is an array of row arrays. Styles can adjust font sizes, alignment, and column span. This section is best suited for displaying detailed, row-level data that requires precise comparison or reference.",
+            "examples": [
+                {
+                    "id": "findings_table",
+                    "type": "table",
+                    "title": "Detailed Audit Findings",
+                    "headers": [
+                        "ID",
+                        "Department",
+                        "Finding",
+                        "Risk Level"
+                    ],
+                    "rows": [
+                        [
+                            "F1",
+                            "IT",
+                            "Unauthorized Access",
+                            "High"
+                        ],
+                        [
+                            "F2",
+                            "Finance",
+                            "Missing Documentation",
+                            "Medium"
+                        ]
+                    ],
+                    "styles": {
+                        "colSpan": 12,
+                        "dataFontScale": 0.9
+                    }
+                }
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/sectionBase"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "const": "table",
+                            "description": "Identifies the section as a table section. Must be set to 'table'."
+                        },
+                        "headers": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "description": "An array of column names for the table. Example: ['ID', 'Department', 'Finding', 'Risk Level']."
+                            }
+                        },
+                        "rows": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "description": "An array of row arrays, where each row is an array of cell values. Example: [['F1', 'IT', 'Unauthorized Access', 'High']]."
+                                }
+                            }
+                        }
+                    },
+                    "required": [
+                        "headers",
+                        "rows"
+                    ],
+                    "additionalProperties": true
+                }
+            ]
+        },
+        "kpiMetric": {
+            "description": "Single KPI metric used inside a KPI section: 'label' provides a descriptive name for the metric, and 'value' shows the numeric or textual representation of the metric. 'delta' and 'trend' (up, down, flat) visualize changes or performance over time. This is used to highlight key performance indicators and their status at a glance.",
+            "type": "object",
+            "properties": {
+                "label": {
+                    "type": "string"
+                },
+                "value": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "number"
+                        }
+                    ]
+                },
+                "delta": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "number"
+                        }
+                    ]
+                },
+                "trend": {
+                    "type": "string",
+                    "enum": [
+                        "up",
+                        "down",
+                        "flat"
+                    ]
+                }
+            },
+            "required": [
+                "label",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "kpiSection": {
+            "description": "KPI section: a horizontal collection of KPI metrics, each rendered as a compact panel. This section is designed to provide a high-level overview of key performance indicators, allowing for quick assessment of performance. Styles control spacing, font sizes, and alignment to ensure visual clarity and impact.",
+            "examples": [
+                {
+                    "id": "kpi_overview",
+                    "type": "kpi",
+                    "title": "Key Performance Indicators",
+                    "metrics": [
+                        {
+                            "label": "Compliance Score",
+                            "value": 95,
+                            "delta": 5,
+                            "trend": "up"
+                        },
+                        {
+                            "label": "Anomalies Found",
+                            "value": 3,
+                            "delta": -1,
+                            "trend": "down"
+                        }
+                    ],
+                    "styles": {
+                        "colSpan": 12,
+                        "fontScale": 1.5
+                    }
+                }
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/sectionBase"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "const": "kpi",
+                            "description": "Identifies the section as a KPI section. Must be set to 'kpi'."
+                        },
+                        "metrics": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/kpiMetric",
+                                "description": "An array of KPI metrics, where each metric includes a 'label', 'value', and optional 'delta' and 'trend'."
+                            }
+                        }
+                    },
+                    "required": [
+                        "metrics"
+                    ],
+                    "additionalProperties": true
+                }
+            ]
+        },
+        "summaryEvaluationSection": {
+            "description": "Summary evaluation: a compact box that provides a top-level summary of the audit. It includes a 'briefingText' for narrative context, a numeric 'score' to quantify overall performance or risk, and 'scoreLabel' to describe the score. 'recommendations' and 'deficiencies' are lists of actionable items and identified issues, respectively. This section is critical for providing a concise, high-level overview of the audit's findings and next steps.",
+            "examples": [
+                {
+                    "id": "summary",
+                    "type": "summary_evaluation",
+                    "title": "Audit Summary",
+                    "briefingText": "The audit identified several areas for improvement, particularly in compliance and security. The overall score reflects a moderate risk level.",
+                    "score": 75,
+                    "scoreLabel": "Moderate Risk",
+                    "footerLabel": "Next steps: Address deficiencies and implement recommendations.",
+                    "recommendations": [
+                        "Implement stricter access controls.",
+                        "Conduct regular compliance training."
+                    ],
+                    "deficiencies": [
+                        "Lack of documentation for key processes.",
+                        "Unauthorized access detected in IT systems."
+                    ],
+                    "styles": {
+                        "colSpan": 12,
+                        "backgroundColor": "#f5f5f5"
+                    }
+                }
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/sectionBase"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "const": "summary_evaluation",
+                            "description": "Identifies the section as a summary evaluation section. Must be set to 'summary_evaluation'."
+                        },
+                        "briefingText": {
+                            "type": "string",
+                            "description": "A narrative summary of the audit findings. This provides context for the score and key insights."
+                        },
+                        "score": {
+                            "type": "number",
+                            "description": "A numeric score representing the overall performance or risk level of the audit. Example: 75."
+                        },
+                        "scoreLabel": {
+                            "type": "string",
+                            "description": "A label describing the score. Example: 'Moderate Risk' or 'High Compliance'."
+                        },
+                        "footerLabel": {
+                            "type": "string",
+                            "description": "Optional text displayed at the bottom of the section, often used for next steps or conclusions."
+                        },
+                        "recommendations": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "description": "A list of actionable recommendations based on the audit findings. Example: ['Implement stricter access controls', 'Conduct regular compliance training']."
+                            }
+                        },
+                        "deficiencies": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "description": "A list of identified deficiencies or issues. Example: ['Lack of documentation for key processes', 'Unauthorized access detected in IT systems']."
+                            }
+                        }
+                    },
+                    "required": [
+                        "briefingText",
+                        "score",
+                        "scoreLabel",
+                        "recommendations",
+                        "deficiencies"
+                    ],
+                    "additionalProperties": true
+                }
+            ]
+        },
+        "dateSection": {
+            "description": "Date section: displays a labeled date/time to provide temporal context for the report. Use 'label' for context (e.g., 'Report Date') and 'icon' for a small glyph. This section ensures that the report's temporal relevance is clearly communicated.",
+            "examples": [
+                {
+                    "id": "report_date",
+                    "type": "date",
+                    "title": "Report Information",
+                    "date": "2026-01-11T00:00:00Z",
+                    "label": "Report Date",
+                    "icon": "calendar",
+                    "styles": {
+                        "colSpan": 4,
+                        "alignment": "center"
+                    }
+                }
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/sectionBase"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "const": "date",
+                            "description": "Identifies the section as a date section. Must be set to 'date'."
+                        },
+                        "date": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "The date and time to display, formatted as ISO 8601. Example: '2026-01-11T00:00:00Z'."
+                        },
+                        "label": {
+                            "type": "string",
+                            "description": "A label for the date, providing context. Example: 'Report Date' or 'Generated On'."
+                        },
+                        "icon": {
+                            "type": "string",
+                            "description": "Optional icon identifier to visually represent the date. Example: 'calendar'."
+                        }
+                    },
+                    "required": [
+                        "date",
+                        "label"
+                    ],
+                    "additionalProperties": true
+                }
+            ]
+        },
+        "anomalyItem": {
+            "description": "Anomaly item: a detailed finding entry that represents an identified issue or irregularity. It includes fields such as 'id' for unique identification, 'title' for a brief description, 'department' for the affected area, 'status' for the current state, 'riskLevel' to quantify severity, and 'riskAnalysis' for a detailed explanation. 'detailedReport' provides a link to further information, and 'internalRef' can be used for cross-referencing. This item is critical for documenting and tracking issues that require attention.",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "description": "Unique identifier for the anomaly. Example: 'A1'."
+                },
+                "title": {
+                    "type": "string",
+                    "description": "Brief description of the anomaly. Example: 'Unauthorized Access'."
+                },
+                "department": {
+                    "type": "string",
+                    "description": "The department or team affected by the anomaly. Example: 'IT'."
+                },
+                "status": {
+                    "type": "string",
+                    "description": "Current status of the anomaly. Example: 'Open', 'Resolved', or 'In Progress'."
+                },
+                "riskLevel": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5,
+                    "description": "Numeric value representing the severity of the anomaly, where 1 is low risk and 5 is high risk. Example: 4."
+                },
+                "riskAnalysis": {
+                    "type": "string",
+                    "description": "Detailed explanation of the risk posed by the anomaly. Example: 'High risk due to potential data breach.'"
+                },
+                "detailedReport": {
+                    "type": "string",
+                    "description": "Link or reference to a detailed report or documentation about the anomaly. Example: 'https://example.com/reports/A1'."
+                },
+                "internalRef": {
+                    "type": "string",
+                    "description": "Internal reference or ticket number for tracking the anomaly. Example: 'TICKET-12345'."
+                },
+                "protocolStatus": {
+                    "type": "string",
+                    "description": "Status of the protocol or process related to the anomaly. Example: 'Violation' or 'Compliant'."
+                },
+                "link": {
+                    "type": "string",
+                    "description": "Optional URL for additional context or actions related to the anomaly. Example: 'https://example.com/actions/A1'."
+                }
+            },
+            "required": [
+                "id",
+                "title",
+                "department",
+                "status",
+                "riskLevel",
+                "riskAnalysis",
+                "detailedReport",
+                "internalRef",
+                "protocolStatus"
+            ],
+            "additionalProperties": false
+        },
+        "anomalySection": {
+            "description": "Anomaly section: a list of anomaly items, presented as an expandable list or compact table. This section is used to highlight and document issues, irregularities, or areas of concern identified during the audit. It provides a structured way to present findings, their severity, and their impact, enabling stakeholders to prioritize and address them effectively.",
+            "examples": [
+                {
+                    "id": "anomalies_list",
+                    "type": "anomaly",
+                    "title": "Identified Anomalies",
+                    "items": [
+                        {
+                            "id": "A1",
+                            "title": "Unauthorized Access",
+                            "department": "IT",
+                            "status": "Open",
+                            "riskLevel": 4,
+                            "riskAnalysis": "High risk due to potential data breach.",
+                            "detailedReport": "https://example.com/reports/A1",
+                            "internalRef": "TICKET-12345",
+                            "protocolStatus": "Violation"
+                        }
+                    ],
+                    "styles": {
+                        "colSpan": 12,
+                        "showGrid": true
+                    }
+                }
+            ],
+            "allOf": [
+                {
+                    "$ref": "#/definitions/sectionBase"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "const": "anomaly",
+                            "description": "Identifies the section as an anomaly section. Must be set to 'anomaly'."
+                        },
+                        "items": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/anomalyItem",
+                                "description": "An array of anomaly items, where each item includes details such as 'id', 'title', 'department', 'status', and 'riskLevel'."
+                            }
+                        }
+                    },
+                    "required": [
+                        "items"
+                    ],
+                    "additionalProperties": true
+                }
+            ]
+        },
+        "section": {
+            "oneOf": [
+                {
+                    "$ref": "#/definitions/textSection"
+                },
+                {
+                    "$ref": "#/definitions/graphicSection"
+                },
+                {
+                    "$ref": "#/definitions/chartSection"
+                },
+                {
+                    "$ref": "#/definitions/tableSection"
+                },
+                {
+                    "$ref": "#/definitions/kpiSection"
+                },
+                {
+                    "$ref": "#/definitions/summaryEvaluationSection"
+                },
+                {
+                    "$ref": "#/definitions/dateSection"
+                },
+                {
+                    "$ref": "#/definitions/anomalySection"
+                }
+            ]
+        }
+    }
+}

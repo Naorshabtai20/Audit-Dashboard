@@ -229,7 +229,7 @@ const App: React.FC = () =>
     {
       // Serialize report and neutralize '<' to avoid closing script tags
       const json = JSON.stringify(report).replace(/</g, '\\u003c');
-      let html = '<!doctype html>\n' + document.documentElement.outerHTML;
+      let html = document.documentElement.outerHTML;
 
       const scriptRoleRe = /<script\s+role=["']global report["']\s*>.*?<\/script>/i;
       html = html.replace(scriptRoleRe, `<script role="global report">window.report = ${json};</script>`);
@@ -238,6 +238,7 @@ const App: React.FC = () =>
       const rootReplacement = `<!-- START ROOT --><div id="root"></div><!-- END ROOT -->`;
 
       html = html.replace(rootBlockRe, rootReplacement);
+      html = '<!doctype html>\n' + html;
 
       const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
       const url = URL.createObjectURL(blob);

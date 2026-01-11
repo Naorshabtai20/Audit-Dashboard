@@ -1,0 +1,308 @@
+{
+  "tabs": [
+    {
+      "title": "רקע",
+      "icon": "📄",
+      "sections": [
+        {
+          "id": "sec-1767870419043",
+          "type": "text",
+          "title": "רקע, מטרת הסקירה והיקפה ",
+          "styles": {
+            "colSpan": 8,
+            "fontScale": 1,
+            "dataFontScale": 1,
+            "labelFontScale": 1,
+            "alignment": "right"
+          },
+          "content": "תחום כרטיסי האשראי מהווה נדבך חשוב בליבת הפעילות הבנקאית השוטפת, ומאפויין בפוטנציאל עסקי ניכר ובסביבה תחרותית ודינאמית. \nלצורך התמודדות עם השוק התחרותי, הוקם בשנת 2021 שבט כרטיסי אשראי ייעודי אשר באחריותו ליזום, לפתח ולנהל מוצרים ותהליכים בתחום כרטיסי האשראי."
+        },
+        {
+          "id": "sec-1767872254547",
+          "type": "date",
+          "title": "תאריכון",
+          "styles": {
+            "colSpan": 4,
+            "fontScale": 1,
+            "dataFontScale": 0.6,
+            "labelFontScale": 0.8,
+            "alignment": "right"
+          },
+          "date": "2025-09-08",
+          "label": "תאריך הדו\"ח"
+        },
+        {
+          "id": "sec-1767870598055",
+          "type": "text",
+          "title": "מטרת הסקירה",
+          "styles": {
+            "colSpan": 4,
+            "fontScale": 1,
+            "dataFontScale": 1,
+            "labelFontScale": 1,
+            "alignment": "right"
+          },
+          "content": "סקירת סוגיות נבחרות למיצוי פונציאל העסקי והגדלת מצבת כרטיסי האשראי והגברת השימוש בהם."
+        },
+        {
+          "id": "sec-1767870664068",
+          "type": "text",
+          "title": "היקף ושיטת הביקורת",
+          "styles": {
+            "colSpan": 8,
+            "fontScale": 1,
+            "dataFontScale": 1,
+            "labelFontScale": 1,
+            "alignment": "right"
+          },
+          "content": "* סקירת תוכניות עבודה של החטיבה\n* בחינת נתונים כמותיים פיננסיים בעולם כרטיסי האשראי\n*שליפות ייעודיות לניתוח נתוני האשראי\n*קיום שיחות עם גורמים רלוונטיים"
+        },
+        {
+          "id": "sec-1767891594908",
+          "type": "graphic",
+          "title": "תמונה / גרפיקה",
+          "styles": {
+            "colSpan": 12,
+            "height": 400,
+            "fontScale": 1,
+            "dataFontScale": 1,
+            "labelFontScale": 1,
+            "alignment": "right"
+          },
+          "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAvAAAAHECAMAAABoe+5uAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAC9UExURdnZ2dnZ2dra2v////z8/Lu7u3p6ellZWX5+frGxsfj4+IuLi8XFxY2Njenp6Z6enuPj4/n5+WxsbNDQ0GRkZFxcXMLCwufn5+rq6nl5eb+/v3Z2duDg4NTU1IKCgtfX16enp6urq2BgYPHx8aOjo4eHh7S0tNvb25WVlZ+fn5iYmHNzc+zs7MrKypubm83Nze7u7sjIyOTk5Li4uM/Pz2hoaNbW1tLS0hVggszMzOLi4qmpqZycnNra2tnZ2Sz0gY4AAAA/dFJOU4f/n//////////////////////////////////////////////////////////////////////////////H30d52yUAAAAJcEhZcwAAFxEAABcRAcom8z8AABa3SURBVHhe7d1/WxPnusXxcogdK5ZTMBQNCtqmFep2H6Xp7vn9/l/WvpIJgXyTMrBm7mff5FmfP2wFXNdKnyWdQHS++WbPrBr/5r1bVb7Z29s3q4QHb1Xx4K0qHrxVxYO3qnjwVhUP3qriwVtVPHirigdvVfHgrSoevFXFg7eqePBWFQ/equLBW1U8eKuKB29V8eCtKh68VcWDt6p48FYVD7630bNvm6Z5/t2L9mcHzUt+RIfRQXPr+/39w3//4e67j44fnWh/yYPv69V4OdWTH+c/fejgT1+v/hWDPzpu3ix+8yw/xIMfkgff06Rpzt7u7++/O28Wu3zg4C+Wo14ZHcw/uS+8bz7c/RAPfkgefD+H4+b71bXMTz8PMvglDz6CB9/PdLHyhYvFp3gPPjcPvpej49uZHv3y/Nd28KNn46Y5+9i+efT+26Y5uVw8D12886r5MGmv11e/V9YHP51f0tx+yGrwo1fzpN/Wf6PY43jwvbSf1e8aHTQ/tk9CTxaLPzpumvPfxu3PRgfN5LhpPvz4fNw0z5+f3zP42w+5Gfz8ue2n5ze5pvHge5lszG8+y7O9/f2/LT/3TxYXJss5L975ef7Fl/suaRaD37ykmTRvfpj/D4O/0h7Dg+9lsnZZMjc6WA5yufRnf/+P+c8ubp7RLtf6+MEfHbe/tx74JMG28+B72Tr4xVyXE79xOF4Ovn2nMPjVr1i+2yQefC8PHPzp6bveg580n/6+cM4v59gjePC9bL2GXx/8u19uvyTTZ/DTm+/FLl5+YCIPvpe1r9J8OW2fnq4N/n3TXH49Pe1/STP1zofgwfey9nX44/lQMfiL5f8C+g++fRJsPXnw/dz5TuvhePmd1ruDnyxn3H/w60+CTeTB97PttTR3B39zIbL6suRq8JjvtsG3H7L6suTy+09Xz5cZJvDge7p5teT17asl1z/D/zT/btHvfNJ6OMaz3c3B33zIzS9aPkF+tfE82R7Bg+9r8/Xwdwe/eGXBL83JS1zSLF4ncN9LC+58yKRpTtpX6TSf5i848Cf4Hjz43to/8fTp9k883R38/uhq8YIvXsMv3n73qmZz8KsPGf0+bt8yf/FYc/759hfZo3nwVhUP3qriwVtVPHirigdvVfHgrSoevFXFg7eqePBWFQ/equLBW1U8eKuKB29V8eCtKh68VcWDt6p48FYVD96q4sFbVTx4q4oHb1Xx4K0qHrxVxYO3qnjwVhUP3qriwVtVPHirypbBz//Kzk+Lvwm3/fvP53yjRNsNm4OfNJez2dXq7zH/4+tsNpvN76Vr9vRtDP7oePG3Nk+Xd2S58H1WbJdsDL41Olj+ZeUXvpOW7ZKtg//yj6uz5W1VJmdXd67ozZ64bYM/Ol7cYmVh0ly+vV5d0Zs9cdsGP7999Hh5SXP95/zH6ZYr+T2zzDjY1l8Mfn+ydqu49Z+1mG+WCgfb2hj8Rbvti7UvvW8bvNkTtDH4o+P2pqDziZ/uH47nPxsd+Gs1ths2Bn/zjafv5//2YX/a/szfabXdsDn425cWzAe/uAnpmW8Najtiy+DNdpcHb1Xx4K0qHrxVxYO3qnjwVhUP3qriwVtVPHirigdvVfHgrSoevFXFg7eqePBWFQ/equLBW1U8eKuKB29V8eCtKh68VcWDt6p48FYVD96q4sFbVTx4q4oHb1Xx4K0qHrxVxYO3qnjwVhUP3qriwVtVPHirigdvVfHgrSrdg1/d8sns6esc/PKmfr73vO2ErsEfHS/uQT/1jVptJ3QNvjU6WMze7Kl7yOC//OPqzLeet53wgMEfHTcnv/KN819plhgH23rA4Pf399+NNy9pmG81+89BMLUXDrb1sMHvT058TWP34HQ1TA3QNfiLdukXzUu+x+wWp6thaoCuwR8dL74C78/wdi9OV8PUAF2Dv/nG0+Y1vNktTlfD1ACdg/dLC+wBOF0NUwN0D96sG6erYWoAD96GwOlqmBrAg7chcLoapgbw4G0InK6GqQE8eBsCp6thagAP3obA6WqYGsCDtyFwuhqmBvDgbQicroapATx4GwKnq2FqAA/ehsDpapgawIO3IXC6GqYG8OBtCJyuhqkBPHgbAqerYWoAD96GwOlqmBrAg7chcLoapgbw4G0InK6GqQE8eBsCp6thagAP3obA6WqYGsCDtyFwuhqmBvDgbQicroapATx4GwKnq2FqAA/ehsDpapgawIO3IXC6GqYG8OBtCJyuhqkBPHgbAqerYWoAD96GwOlqmBrAg7chcLoapgbw4G0InK6GqQE8eBsCp6thagAP3obA6WqYGsCDtyFwuhqmBvDgbQicroapATx4GwKnq2FqAA/ehsDpapgaYMvg353fucfN4biZ8z387F6croapATYHf9Gcf50d3Ez88I+vs9ls9nrtQ8yA09UwNcDG4EcHb17c/Dif/08/332v2VacroapATYGv7wx6/Rm8Mt/mt2H09UwNcDG4Furz/CTsyvftdI6cboapgb4i8GvbjU/aS7fXl81i8/6Zn+F09UwNcD2wb9aLfz6z/mP0y1X8ntmK5yuhqm9cLCtrYOf8DP65OTj+hs8eFvD6WqY2gsH29oy+NH7E16zbxu82S1OV8PUAJuDHx2s1n26fzief65fPYU1247T1TA1wMbgj85Pvpt/q2n2enFlM20uZ7Mrf6fV7sfpapgaYGPwF4uXEixeTTAf/OjZt01z9vnuR5ht4HQ1TA2wMXgzAaerYWoAD96GwOlqmBrAg7chcLoapgbw4G0InK6GqQE8eBsCp6thagAP3obA6WqYGsCDtyFwuhqmBvDgbQicroapATx4GwKnq2FqAA/ehsDpapgawIO3IXC6GqYG8OBtCJyuhqkBPHgbAqerYWoAD96GwOlqmBrAg7chcLoapgbw4G0InK6GqQE8eBsCp6thagAP3obA6WqYGsCDtyFwuhqmBvDgbQicroapATx4GwKnq2FqAA/ehsDpapgawIO3IXC6GqYG8OBtCJyuhqkBPHgbAqerYWoAD96GwOlqmBrAg7chcLoapgbw4G0InK6GqQE8eBsCp6thagAP3obA6WqYGsCDtyFwuhqmBvDgbQicroapATx4GwKnq2FqAA/ehsDp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"
+        }
+      ]
+    },
+    {
+      "title": "הערכה מסכמת",
+      "icon": "📊",
+      "sections": [
+        {
+          "id": "sec-1767870927513",
+          "type": "kpi",
+          "title": "מדדי KPI",
+          "styles": {
+            "colSpan": 12,
+            "fontScale": 0.7,
+            "dataFontScale": 0.7,
+            "labelFontScale": 1,
+            "alignment": "right"
+          },
+          "metrics": [
+            {
+              "label": "עלות גיוס",
+              "value": "1,000,000",
+              "delta": "3.42%"
+            },
+            {
+              "label": "עלות העמקת פעילות",
+              "value": "1,340,000",
+              "delta": "6%-"
+            },
+            {
+              "label": "% נטישת לקוחות שפתחו חשבון ונטשו ",
+              "value": "17%"
+            }
+          ]
+        },
+        {
+          "id": "sec-1767872591817",
+          "type": "chart",
+          "title": "פילוח מקור הכנסות הבנק מפעילות כרטיסי אשראי (2023)",
+          "styles": {
+            "colSpan": 5,
+            "height": 320,
+            "fontScale": 1,
+            "dataFontScale": 1,
+            "labelFontScale": 1,
+            "alignment": "right"
+          },
+          "chartKind": "donut",
+          "data": [
+            {
+              "סוג": "עמלת מטח",
+              "אחוז": 13
+            },
+            {
+              "סוג": "דמי כרטיס אשראי",
+              "אחוז": 25
+            },
+            {
+              "סוג": "עמלת צולבת",
+              "אחוז": 62
+            }
+          ],
+          "xKey": "סוג",
+          "seriesKeys": [
+            "אחוז"
+          ]
+        },
+        {
+          "id": "sec-1767871104452",
+          "type": "chart",
+          "title": "גיוס כרטיסים",
+          "styles": {
+            "colSpan": 7,
+            "height": 330,
+            "fontScale": 0.5,
+            "dataFontScale": 0.9,
+            "labelFontScale": 1,
+            "alignment": "right"
+          },
+          "chartKind": "line",
+          "data": [
+            {
+              "חודש": "ינו-24",
+              "כמות כרטיסים שגוייסו": 10831
+            },
+            {
+              "חודש": "פבר-24",
+              "כמות כרטיסים שגוייסו": 18281
+            },
+            {
+              "חודש": "מרץ-24",
+              "כמות כרטיסים שגוייסו": 19978
+            },
+            {
+              "חודש": "אפר-24",
+              "כמות כרטיסים שגוייסו": 12634
+            },
+            {
+              "חודש": "מאי-24",
+              "כמות כרטיסים שגוייסו": 18047
+            },
+            {
+              "חודש": "יונ-24",
+              "כמות כרטיסים שגוייסו": 11350
+            },
+            {
+              "חודש": "יול-24",
+              "כמות כרטיסים שגוייסו": 13205
+            },
+            {
+              "חודש": "אוג-24",
+              "כמות כרטיסים שגוייסו": 19833
+            },
+            {
+              "חודש": "ספט-24",
+              "כמות כרטיסים שגוייסו": 16478
+            },
+            {
+              "חודש": "אוק-24",
+              "כמות כרטיסים שגוייסו": 13462
+            },
+            {
+              "חודש": "נוב-24",
+              "כמות כרטיסים שגוייסו": 14862
+            },
+            {
+              "חודש": "דצמ-24",
+              "כמות כרטיסים שגוייסו": 18207
+            }
+          ],
+          "xKey": "חודש",
+          "seriesKeys": [
+            "כמות כרטיסים שגוייסו"
+          ]
+        },
+        {
+          "id": "sec-1767871171823",
+          "type": "summary_evaluation",
+          "title": "הערכה מסכמת",
+          "styles": {
+            "colSpan": 12,
+            "fontScale": 0.7,
+            "dataFontScale": 0.7,
+            "labelFontScale": 0.7,
+            "alignment": "right"
+          },
+          "briefingText": "כרטיסי אשראי הינו תחום בעל פוטנציאל עסקי גבוה, הפועל בסביבה תחרותית ודינאמית. בשנים האחרונות הבנק מוביל בהכנסות מכרטיסי אשראי ביחס למערכת הבנקאית, ופועל כל העת לפתח את הממשק הדיגיטלי ללקוחות באפליקציה ואתר הבנק, לצד הרחבת מועדון הלקוחות והעמקת שיתופי פעולה עם מועדונים שונים",
+          "score": 3,
+          "scoreLabel": "טעון שיפור",
+          "recommendations": [
+            "המלצה 1",
+            "לפתח מסע לקוח המאפשר הצטרפות דיגיטלית",
+            "לתעדף חשבונות עם פוטנציאל מכירה",
+            "להפעיל ניטור ובקרה על חשבונות חסומים לכרטיסי אשראי"
+          ],
+          "deficiencies": [
+            "ליקוי 1",
+            "פונציאל המכירה היזומה אינו מתועדף כראוי",
+            "קימות מגבלות בפעילות כרטיסי אשראי ללקוחות דיגיטל",
+            "אפקטיביות נמוכה למסעות לקוח"
+          ]
+        },
+        {
+          "id": "sec-1767871824365",
+          "type": "graphic",
+          "title": "תמונה / גרפיקה",
+          "styles": {
+            "colSpan": 12,
+            "height": 400,
+            "fontScale": 1,
+            "dataFontScale": 1,
+            "labelFontScale": 1,
+            "alignment": "right"
+          },
+          "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABD8AAAH7CAYAAADLiDRLAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAEnQAABJ0Ad5mH3gAAP+lSURBVHhe7N13eGVXdfD/7zn33N4kXfU+vVfbMy642xjTSSgJLQRIIYkTWgLkJQlpJCHBSbBJgLy/vCS0BAgEMLiAex+XmfF4mqaojHq/vZ3y+0MaeXTcpHuv2tX6PI+e0b1rSy6jo7PP2muvrViWZSGEEEIIIYQQQghRplT7G0IIIYQQQgghhBDlRJIfQgghhBBCCCGEKGuS/BBCCCGEEEIIIURZk+SHEEIIIYQQQgghypokP4QQQgghhBBCCFHWJPkhhBBCCCGEEEKIsibJDyGEEEIIIYQQQpQ1SX4IIYQQQgghhBCirEnyQwghhBBCCCGEEGVNkh9CCCGEEEIIIYQoa5L8EEIIIYQQQgghRFmT5IcQQgghhBBCCCHKmiQ/hBBCCCGEEEIIUdYk+SGEEEIIIYQQQoiyJskPIYQQQgghhBBClDVJfgghhBBCCCGEEKKsSfJDCCGEEEIIIYQQZU2SH0IIIYQQQgghhChrkvwQQgghhBBCCCFEWZPkhxBCCCGEEEIIIcqaJD+EEEIIIYQQQghR1iT5IYQQQgghhBBCiLImyQ8hhBBCCCGEEEKUNUl+CCGEEEIIIYQQoqxJ8kMIIYQQQgghhBBlTZIfQgghhBBCCCGEKGuS/BBCCCGEEEIIIURZk+SHEEIIIYQQQgghypokP4QQQgghhBBCCFHWJPkhhBBCCCGEEEKIsibJDyGEEEIIIYQQQpQ1SX4IIYQQQgghhBCirEnyQwghhBBCCCGEEGVNkh9CCCGEEEIIIYQoa5L8EEIIIYQQQgghRFmT5IcQQgghhBBCCCHKmiQ/hBBCCCGEEEIIUdYk+SGEEEIIIYQQQoiyJskPIYQQQgghhBBClDVJfgghhBBCCCGEEKKsSfJDCCGEEEIIIYQQZU2SH0IIIYQQQgghhChrkvwQQgghhBBCCCFEWZPkhxBCCCGEEEIIIcqaJD+EEEIIIYQQQghR1iT5IYQQQgghhBBCiLImyQ8hhBBCCCGEEEKUNUl+CCGEEEIIIYQQoqxJ8kMIIYQQQgghhBBlTZIfQgghhBBCCCGEKGuS/BBCCCGEEEIIIURZk+SHEEIIIYQQQgghypokP4QQQgghhBBCCFHWJPkhhBBCCCGEEEKIsibJDyGEEEIIIYQQQpQ1SX4IIYQQQgghhBCirEnyQwghhBBCCCGEEGVNkh9CCCGEEEIIIYQoa5L8EEIIIYQQQgghRFmT5IcQQgghhBBCCCHKmiQ/hBBCCCGEEEIIUdYk+SGEEEIIIYQQQoiyJskPIYQQQgghhBBClDVJfgghhBBCCCGEEKKsSfJDCCGEEEIIIYQQZU2SH0IIIYQQQgghhChrkvwQQgghhBBCCCFEWZPkhxBCCCGEEEIIIcqaJD+EEEIIIYQQQghR1iT5IYQQQgghhBBCiLImyQ8hhBBCCCGEEEKUNUl+CCGEEEIIIYQQoqxJ8kMIIYQQQgghhBBlTZIfQgghhBBCCCGEKGuS/BBCCCGEEEIIIURZk+SHEEIIIYQQQgghypokP4QQQgghhBBCCFHWJPkhhBBCCCGEEEKIsibJDyGEEEIIIYQQQpQ1SX4IIYQQQgghhBCirEnyQwghhBBCCCGEEGVNkh9CCCGEEEIIIYQoa5L8EEIIIYQQQgghRFmT5IcQQgghhBBCCCHKmiQ/hBBCCCGEEEIIUdYk+SGEEEIIIYQQQoiyJskPIYQQQgghhBBClDVJfgghhBBCCCGEEKKsSfJDCCGEEEIIIYQQZU2SH0IIIYQQQgghhChrkvwQQgghhBBCCCFEWZPkhxBCCCGEEEIIIcqaJD+EEEIIIYQQQghR1iT5IYQQQgghhBBCiLImyQ8hhBBCCCGEEEKUNUl+CCGEEEIIIYQQoqxJ8kMIIYQQQgghhBBlTZIfQgghhBBCCCGEKGuS/BBCCCGEEEIIIURZk+SHEEIIIYQQQgghypokP4QQQgghhBBCCFHWJPkhhBBCCCGEEEKIsibJDyGEEEIIIYQQQpQ1SX4IIYQQQgghhBCirEnyQwghhBBCCCGEEGVNkh9CCCGEEEIIIYQoa5L8EEIIIYQQQgghRFmT5IcQQgghhBBCCCHKmiQ/hBBCCCGEEEIIUdYk+SGEEEIIIYQQQoiyJskPIYQQQgghhBBClDVJfgghhBBCCCGEEKKsSfJDCCGEEEIIIYQQZU2SH0IIIYQQQgghhChrkvwQQgghhBBCCCFEWZPkhxBCCCGEEEIIIcqaJD+EEEIIIYQQQghR1iT5IYQQQgghhBBCiLImyQ8hhBBCCCGEEEKUNUl+CCGEEEIIIYQQoqxJ8kMIIYQQQgghhBBlTZIfQgghhBBCCCGEKGuS/BBCCCGEEEIIIURZk+SHEEIIIYQQQgghypokP4QQQgghhBBCCFHWJPkhhBBCCCGEEEKIsibJDyGEEEIIIYQQQpQ1SX4IIYQQQgghhBCirEnyQwghhBBCCCGEEGVNkh9CCCGEEEIIIYQoa5L8EEIIIYQQQgghRFmT5IcQQgghhBBCCCHKmiQ/hBBCCCGEEEIIUdYk+SGEEEIIIYQQQoiyJskPIYQQQgghhBBClDVJfgghhBBCCCGEEKKsSfJDCCGEEEIIIYQQZU2SH0IIIYQQQgghhChrkvwQQgghhBBCCCFEWZPkhxBCCCGEEEIIIcqaJD+EEEIIIYQQQghR1iT5IYQQQgghhBBCiLImyQ8hhBBCCCGEEEKUNUl+CCGEEEIIIYQQoqxJ8kMIIYQQQgghhBBlTZIfQgghhBBCCCGEKGuS/BBCCCGEEEIIIURZk+SHEEIIIYQQQgghypokP4QQQgghhBBCCFHWJPkhhBBCCCGEEEKIsibJDyGEEEIIIYQQQpQ1SX4IIYQQQgghhBCirEnyQwghhBBCCCGEEGVNkh9CCCGEEEIIIYQoa5L8EEIIIYQQQgghRFmT5IcQQgghhBBCCCHKmiQ/hBBCCCGEEEIIUdYk+SGEEEIIIYQQQoiyJskPIYQQQgghhBBClDVJfgghhBBCCCGEEKKsSfJDCCGEEEIIIYQQZU2SH0IIIYQQQgghhChrkvwQQgghhBBCCCFEWZPkhxBCCCGEEEIIIcqaJD+EEEIIIYQQQghR1iT5IYQQQgghhBBCiLImyQ8hhBBCCCGEEEKUNUl+CCGEEEIIIYQQoqxJ8kMIIYQQQgghhBBlTZIfQgghhBBCCCGEKGuS/BBCCCGEEEIIIURZk+SHEEIIIYQQQgghypokP4QQQgghhBBCCFHWJPkhhBBCCCGEEEKIsibJDyGEEEIIIYQQQpQ1SX4IIYQQQgghhBCirEnyQwghhBBCCCGEEGVNkh9CCCGEEEIIIYQoa5L8EEIIIYQQQgghRFmT5IcQQgghhBBCCCHKmiQ/hBBCCCGEEEIIUdYk+SGEEEIIIYQQQoiyJskPIYQQQgghhBBClDVJfgghhBBCCCGEEKKsSfJDCCGEEEIIIYQQZU2SH0IIIYQQQgghhChrkvwQQgghhBBCCCFEWZPkhxBCCCGEEEIIIcqaJD+EEEIIIYQQQghR1iT5IYQQQgghhBBCiLImyQ8hhBBCCCGEEEKUNUl+CCGEEEIIIYQQoqxJ8kMIIYQQQgghhBBlTZIfQgghhBBCCCGEKGuS/BBCCCGEEEIIIURZk+SHEEIIIYQQQgghypokP4QQQgghhBBCCFHWJPkhhBBCCCGEEEKIsibJDyGEEEIIIYQQQpQ1SX4IIYQQQgghhBCirEnyQwghhBBCCCGEEGVNkh9CCCGEEEIIIYQoa5L8EEIIIYQQQgghRFmT5IcQQgghhBBCCCHKmiQ/hBBCCCGEEEIIUdYk+SGEEEIIIYQQQoiyJskPIYQQQgghhBBClDVJfgghhBBCCCGEEKKsSfJDCCGEEEIIIYQQZU2SH0IIIYQQQgghhChrkvwQQgghhBBCCCFEWZPkhxBCCCGEEEIIIcqaJD+EEEIIIYQQQghR1iT5IYQQQgghhBBCiLImyQ8hhBBCCCGEEEKUNUl+CCGEEEIIIYQQoqxJ8kMIIYQQQgghhBBlTZIfQgghhBBCCCGEKGuS/BBCCCGEEEIIIURZk+SHEEIIIYQQQgghypokP4QQQgghhBBCCFHWJPkhhBBCCCGEEEKIsibJDyGEEEIIIYQQQpQ1SX4IIYQQQgghhBCirEnyQwghhBBCCCGEEGVNkh9CCCGEEEIIIYQoa5L8EEIIIYQQQgghRFmT5IcQQgghhBBCCCHKmiQ/hBBCCCGEEEIIUdYk+SGEEEIIIYQQQoiyJskPIYQQQgghhBBClDVJfgghhBBCCCGEEKKsSfJDCCGEEEIIIYQQZU2SH0IIIYQQQgghhChrkvwQQgghhBBCCCFEWZPkhxBCCCGEEEIIIcqaJD+EEEIIIYQQQghR1iT5IYQQQgghhBBCiLImyQ8hhBBCCCGEEEKUNUl+CCGEEEIIIYQQoqxJ8kMIIYQQQgghhBBlTZIfQgghhBBCCCGEKGuS/BBCCCGEEEIIIURZk+SHEEIIIYQQQgghypokP4QQQgghhBBCCFHWJPkhhBBCCCGEEEKIsibJDyGEEEPi/2/vvuOauvf/gb/CwZKwFRUQFBwg4qgDrHsW6bJa26qtve7WUUeHilqtWlvHddbaofZbrLW3jlvrqPbWXsEFIu4BijJEVtghIQPJ4fP7o8n55ZwkEKz33krfz8fDx0Pen09Ozsg5yXmfzyCGEEEIIIYQQQghRplT7G0IIIYQQQgghhBDlRJIfQgghhBBCCCGEKGuS/BBCCCGEEEIIIURZk+SHEEIIIYQQQgghypokP4QQQgghhBBCCFHWJPkhhBBCCCGEEEKIsibJDyGEEEIIIYQQQpQ1SX4IIYQQQgghhBCirEnyQwghhBBCCCGEEGVNkh9CCCGEEEIIIYQoa5L8EEIIIYQQQgghRFmT5IcQQgghhBBCCCHKmiQ/hBBCCCGEEEIIUdYk+SGEEEIIIYQQQoiyJskPIYQQQgghhBBClDVJfgghhBBCCCGEEKKsSfJDCCGEEEIIIYQQZU2SH0IIIYQQQgghhChrkvwQQgghhBBCCCFEWZPkhxBCCCGEEEIIIcqaJD+EEEIIIYQQQghR1iT5IYQQQgghhBBCiLImyQ8hhBBCCCGEEEKUNUl+CCGEEEIIIYQQoqxJ8kMIIYQQQgghhBBlTZIfQgghhBBCCCGEKGuS/BBCCCGEEEIIIURZk+SHEEIIIYQQQgghypokP4QQQgghhBBCCFHWJPkhhBBCCCGEEEKIsibJDyGEEEIIIYQQQpQ1SX4IIYQQQgghhBCirEnyQwghhBBCCCGEEGVNkh9CCCGEEEIIIYQoa5L8EEIIIYQQQgghRFmT5IcQQgghhBBCCCHKmiQ/hBBCCCGEEEIIUdYk+SGEEEIIIYQQQoiyJskPIYQQQgghhBBClDVJfgghhBBCCCGEEKKsSfJDCCGEEEIIIYQQZU2SH0IIIYQQQgghhChrkvwQQgghhBBCCCFEWZPkhxBCCCGEEEIIIcqaJD+EEEIIIYQQQghR1iT5IYQQQgghhBBCiLImyQ8hhBBCCCGEEEKUNUl+CCGEEEIIIYQQoqxJ8kMIIYQQQgghhBBlTZIfQgghhBBCCCGEKGuS/BBCCCGEEEIIIURZk+SHEEIIIYQQQgghypokP4QQQgghhBBCCFHWJPkhhBBCCCGEEEKIsibJDyGEEEIIIYQQQpQ1SX4IIYQQQgghhBCirEnyQwghhBBCCCGEEGVNkh9CCCGEEEIIIYQoa5L8EEIIIYQQQgghRFmT5IcQQgghhBBCCCHKmiQ/hBBCCCGEEEIIUdYk+SGEEEIIIYQQQoiyJskPIYQQQgghhBBClDVJfgghhBBCCCGEEKKsSfJDCCGEEEIIIYQQZU2SH0IIIYQQQgghhChrkvwQQgghhBBCCCFEWZPkhxBCCCGEEEIIIcqaJD+EEEIIIYQQQghR1iT5IYQQQgghhBBCiLImyQ8hhBBCCCGEEEKUNUl+CCGEEEIIIYQQoqxJ8kMIIYQQQgghhBBlTZIfQgghhBBCCCGEKGuS/BBCCCGEEIIIURZk+SHEEIIIYQQQgghypokP4QQQgghhBBCCFHWJPkhhBBCCCGEEEKIsibJDyGEEEIIIYQQQpQ1SX4IIYQQQgghhBCirEnyQwghhBBCCCGEEGVNkh9CCCGEEEIIIYQoa5L8EEIIIYQQQgghRFmT5IcQQgghhBBCCCHKmiQ/hBBCCCGEEEIIUdYk+SGEEEIIIYQQQoiyJskPIYQQQgghhBBClDVJfgghhBBCCCGEEKKsSfJDCCGEEEIIIYQQZU2SH0IIIYQQQgghhChrkvwQQgghhBBCCCFEWZPkhxBCCCGEEEIIIcqaJD+EEEIIIYQQQghR1iT5IYQQQgghhBBCiLImyQ8hhBBCCCGEEEKUNUl+CCGEEEIIIYQQoqxJ8kMIIYQQQgghhBBlTZIfQgghhBBCCCGEKGuS/BBCCCGEEEIIIURZk+SHEEIIIYQQQgghypokP4QQQgghhBBCCFHWJPkhhBBCCCGEEEKIsibJDyGEEEIIIYQQQpQ1SX4IIYQQQgghhBCirEnyQwghhBBCCCGEEGVNkh9CCCGEEEIIIYQoa5L8EEIIIYQQQgghRFmT5IcQQgghhBBCCCHKmiQ/hBBCCCGEEEIIUdYk+SGEEEIIIYQQQoiyJskPIYQQQgghhBBClDVJfgghhBBCCCGEEKKsSfJDCCGEEEIIIYQQZU2SH0IIIYQQQgghhChrkvwQQgghhBBCCCFEWZPkhxBCCCGEEEIIIcqaJD+EEEIIIYQQQghR1iT5IYQQQgghhBBCiLImyQ8hhBBCCCGEEEKUNUl+CCGEEEIIIYQQoqxJ8kMIIYQQQgghhBBlTZIfQgghhBBCCCGEKGuS/BBCCCGEEEIIIURZk+SHEEIIIYQQQgghypokP4QQQgghhBBCCFHWJPkhhBBCCCGEEEKIsibJDyGEEEIIIYQQQpQ1SX4IIYQQQgghhBCirEnyQwghhBBCCCGEEGVNkh9CCCGEEEIIIYQoa5L8EEIIIYQQQgghRFmT5IcQQgghhBBCCCHKmiQ/hBBCCCGEEEIIUdYk+SGEEEIIIYQQQoiyJskPIYQQQgghhBBClDVJfgghhBBCCCGEEKKsSfJDCCGEEEIIIYQQZU2SH0IIIYQQQgghhChrkvwQQgghhBBCCCFEWZPkhxBCCCGEEEIIIcqaJD+EEEIIIYQQQghR1iT5IYQQQgghhBBCiLImyQ8hhBBCCCGEEEKUNUl+CCGEEEIIIYQQoqxJ8kMIIYQQQgghhBBlTZIfQgghhBBCCCGEKGuS/BBCCCGEEEIIIURZk+SHEEIIIYQQQgghypokP4QQQgghhBBCCFHWJPkhhBBCCCGEEEKIsibJDyGEEEIIIYQQQpQ1SX4IIYQQQgghhBCirEnyQwghhBBCCCGEEGVNkh9CCCGEEEIIIYQoa5L8EEIIIYQQQgghRFmT5IcQQgghhBBCCCHKmiQ/hBBCCCGEEEIIUdYk+SGEEEIIIYQQQoiyJskPIYQQQgghhBBClDVJfgghhBBCCCGEEKKsSfJDCCGEEEIIIYQQZU2SH0IIIYQQQgghhChrkvwQQgghhBBCCCFEWZPkhxBCCCGEEEIIIcqaJD+EEEIIIYQQQghR1iT5IYQQQgghhBBCiLImyQ8hhBBCCCGEEEKUNUl+CCGEEEIIIYQQoqxJ8kMIIYQQQgghhBBlTZIfQgghhBBCCCGEKGuS/BBCCCGEEEIIIURZk+SHEEIIIYQQQgghypokP4QQQgghhBBCCFHWJPkhhBBCCCGEEEKIsibJDyGEEEIIIYQQQpQ1SX4IIYQQQgghhBCirEnyQwghhBBCCCGEEGVNkh9CCCGEEEIIIYQoa5L8EEIIIYQQQgghRFmT5IcQQgghhBBCCCHKmiQ/hBBCCCGEEEIIUdYk+SGEEEIIIYQQQoiyJskPIYQQQgghhBBClDVJfgghhBBCCCGEEKKsSfJDCCGEEEIIIYQQZU2SH0IIIYQQQgghhChrkvwQQgghhBBCCCFEWZPkhxBCCCGEEEIIIcqaJD+EEEIIIYQQQghR1iT5IYQQQgghhBBCiLImyQ8hhBBCCCGEEEKUNUl+CCGEEEIIIYQQoqxJ8kMIIYQQQgghhBBlTZIfQgghhBBCCCGEKGuS/BBCCCGEEEIIIURZk+SHEEIIIYQQQgghypokP4QQQgghhBBCCFHWJPkhhBBCCCGEEEKIsibJDyGEEEIIIYQQQpQ1SX4IIYQQQgghhBCirEnyQwghhBBCCCGEEGVNkh9CCCGEEEIIIYQoa5L8EEIIIYQQQgghRFmT5IcQQgghhBBCCCHKmiQ/hBBCCCGEEEIIUdYk+SGEEEIIIYQQQoiyJskPIYQQQgghhBBClDVJfgghhBBCCCGEEKKsSfJDCCGEEEIIIYQQZU2SH0IIIYQQQgghhChrkvwQQgghhBBCCCFEWZPkhxBCCCGEEEIIIcqaJD+EEEIIIYQQQghR1iT5IYQQQgghhBBCiLImyQ8hhBBCCCGEEEKUNUl+CCGEEEIIIYQQoqxJ8kMIIYQQQgghhBBlTZIfQgghhBBCCCGEKGuS/BBCCCGEEEIIIURZk+SHEEIIIYQQQgghypokP4QQQgghhBBCCFHWJPkhhBBCCCGEEEKIsibJDyGEEEIIIYQQQpQ1SX4IIYQQQgghhBCirEnyQwghhBBCCCGEEGVNkh9CCCGEEEIIIYQoa5L8EEIIIYQQQgghRFmT5IcQQgghhBBCCCHKmiQ/hBBCCCGEEEIIUdYk+SGEEEIIIYQQQoiyJskPIYQQQgghhBBClDVJfgghhBBCCCGEEKKsSfJDCCGEEEIIIYQQZU2SH0IIIYQQQgghhChrkvwQQgghhBBCCCFEWZPkhxBCCCGEEEIIIcqaJD+EEEIIIYQQQghR1iT5IYQQQgghhBBCiLImyQ8hhBBCCCGEEEKUNUl+CCGEEEIIIYQQoqxJ8kMIIYQQQgghhBBlTZIfQgghhBBCCCGEKGuS/BBCCCGEEEIIIURZk+SHEEIIIYQQQgghypokP4QQQgghhBBCCFHWJPkhhBBCCCGEEEKIsibJDyGEEEIIIYQQQpQ1SX4IIYQQQgghhBCirEnyQwghhBBCCCGEEGVNkh9CCCGEEEIIIYQoa5L8EEIIIYQQQgghRFmT5IcQQgghhBBCCCHKmiQ/hBBCCCGEEEIIUdYk+SGEEEIIIYQQQoiyJskPIYQQQgghhBBClDVJfgghhBBCCCGEEKKsSfJDCCGEEEIIIYQQZU2SH0IIIYQQQgghhChrkvwQQgghhBBCCCFEWZPkhxBCCCGEEEIIIcqaJD+EEEIIIYQQQghR1iT5IYQQQgghhBBCiLImyQ8hhBBCCCGEEEKUNUl+CCGEEEIIIYQQoqxJ8kMIIYQQQgghhBBlTZIfQgghhBBCCCGEKGuS/BBCCCGEEEIIIURZk+SHEEIIIYQQQgghypokP4QQQgghhBBCCFHWJPkhhBBCCCGEEEKIsibJDyGEEEIIIYQQQpQ1SX4IIYQQQgghhBCirEnyQwghhBBCCCGEEGVNkh9CCCGEEEIIIYQoa5L8EEIIIYQQQgghRFmT5IcQQgghhBBCCCHKmiQ/hBBCCCGEEEIIUdYk+SGEEEIIIYQQQoiyJskPIYQQQgghhBBClDVJfgghhBBCCCGEEKKsSfJDCCGEEEIIIYQQZU2SH0IIIYQQQgghhChrkvwQQgghhBBCCCFEWZPkhxBCCCGEEEIIIcqaJD+EEEIIIYQQQghR1iT5IYQQQgghhBBCiLImyQ8hhBBCCCGEEEKUNUl+CCGEEEIIIYQQoqxJ8kMIIYQQQgghhBBlTZIfQgghhBBCCCGEKGuS/BBCCCGEEEIIIURZk+SHEEIIIYQQQgghypokP4QQQgghhBBCCFHWJPkhhBBCCCGEEEKIsibJDyGEEEIIIYQQQpQ1SX4IIYQQQgghhBCirEnyQwghhBBCCCGEEGVNkh9CCCGEEEIIIYQoa5L8EEIIIYQQQgghRFmT5IcQQgghhBBCCCHKmiQ/hBBCCCGEEEIIUdYk+SGEEEIIIYQQQoiyJskPIYQQQgghhBBClDVJfgghhBBCCCGEEKKsSfJDCCGEEEIIIYQQZU2SH0IIIYQQQgghhChrkvwQQgghhBBCCCFEWZPkhxBCCCGEEEIIIcqaJD+EEEIIIYQQQghR1iT5IYQQQgghhBBCiLImyQ8hhBBCCCGEEEKUNUl+CCGEEEIIIYQQoqxJ8kMIIYQQQgghhBBlTZIfQgghhBBCCCGEKGuS/BBCCCGEEEIIIURZk+SHEEIIIYQQQgghypokP4QQQgghhBBCCFHWJPkhhBBCCCGEEEKIsibJDyGEEEIIIYQQQpQ1SX4IIYQQQgghhBCirEnyQwghhBBCCCGEEGVNkh9CCCGEEEIIIYQoa5L8EEIIIYQQQgghRFmT5IcQQgghhBBCCCHKmiQ/hBBCCCGEEEIIUdYk+SGEEEIIIYQQQoiyJskPIYQQQgghhBBClDVJfgghhBBCCCGEEKKsSfJDCCGEEEIIIYQQZU2SH0IIIYQQQgghhChrkvwQQgghhBBCCCFEWZPkhxBCCCGEEEIIIcqaJD+EEEIIIYQQQghR1iT5IYQQQgghhBBCiLImyQ8hhBBCCCGEEEKUNUl+CCGEEEIIIYQQoqxJ8kMIIYQQQgghhBBlTZIfQgghhBBCCCGEKGuS/BBCCCGEEEIIIURZk+SHEEIIIYQQQgghypokP4QQQgghhBBCCFHWJPkhhBBCCCGEEEKIsibJDyGEEEIIIYQQQpQ1SX4IIYQQQgghhBCirEnyQwghhBBCCCGEEGVNkh9CCCGEEEIIIYQoa5L8EEIIIYQQQgghRFmT5IcQQgghhBBCCCHKmiQ/hBBCCCGEEEIIUdYk+SGEEEIIIYQQQoiyJskPIYQQQgghhBBClDVJfgghhBBCCCGEEKKsSfJDCCGEEEIIIYQQZU2SH0IIIYQQQgghhChrkvwQQgghhBBCCCFEWZPkhxBCCCGEEEIIIcqaJD+EEEIIIYQQQghR1iT5IYQQQgghhBBCiLImyQ8hhBBCCCGEEEKUNUl+CCGEEEIIIYQQoqxJ8kMIIYQQQgghhBBlTZIfQgghhBBCCCGEKGuS/BBCCCGEEEIIIURZk+SHEEIIIYQQQgghypokP4QQQgghhBBCCFHWJPkhhBBCCCGEEEKIsibJDyGEEEIIIYQQQpQ1SX4IIYQQQgghhBCirEnyQwghhBBCCCGEEGVNkh9CCCGEEEIIIYQoa5L8EEIIIYQQQgghRFmT5IcQQgghhBBCCCHKmiQ/hBBCCCGEEEIIUdYk+SGEEEIIIYQQQoiyJskPIYQQQgghhBBClDVJfgghhBBCCCGEEKKsSfJDCCGEEEIIIYQQZU2SH0IIIYQQQgghhChq+v8A9Jq4zJ0u8tQAAAABJRU5ErkJggg=="
+        }
+      ]
+    },
+    {
+      "title": "רשימת ממצאים",
+      "icon": "⚠️",
+      "sections": [
+        {
+          "id": "sec-1767872343471",
+          "type": "anomaly",
+          "title": "רשימת ממצאים",
+          "styles": {
+            "colSpan": 12,
+            "fontScale": 1,
+            "dataFontScale": 1,
+            "labelFontScale": 1,
+            "alignment": "right"
+          },
+          "items": [
+            {
+              "id": "an-1767872343471",
+              "title": "היעדר בדיקת כושר החזר (יחס חוב להכנסה)",
+              "department": "קמעונאית",
+              "status": "בטיפול",
+              "riskLevel": 5,
+              "riskAnalysis": "סיכון אשראי מהותי שעלול להוביל לחדלות פירעון של לקוחות ולפגיעה ביציבות תיק האשראי של הבנק, לצד סנקציות רגולטוריות חמורות על \"הלוואות לא אחראיות",
+              "detailedReport": "הבנק מנפיק כרטיסי אשראי עם מסגרות גבוהות מבלי לבצע בדיקה מעמיקה של הכנסות הלקוח או התחייבויותיו הקיימות במערכת הבנקאית",
+              "internalRef": "REF-99",
+              "protocolStatus": "פתוח",
+              "link": ""
+            },
+            {
+              "id": "an-1767872409010",
+              "title": "אי-עמידה בכללי \"הכר את הלקוח\" (KYC) ואנטי-לבנת הון",
+              "department": "קמעונאית",
+              "status": "בטיפול",
+              "riskLevel": 3,
+              "riskAnalysis": "חשיפה לסיכוני הלבנת הון ומימון טרור. קנסות רגולטוריים בתחום זה הם הגבוהים ביותר בעולם הבנקאות.",
+              "detailedReport": "בתהליך הגיוס הדיגיטלי (On-boarding), לא נאספו מסמכי זיהוי מעודכנים או שלא בוצע אימות מול רשימות סנקציות ולקוחות בסיכון גבוה (PEP)",
+              "internalRef": "REF-35",
+              "protocolStatus": "פתוח",
+              "link": ""
+            },
+            {
+              "id": "an-1767872448552",
+              "title": "כשל בתיעוד הסכמות לקוח (שיווק אגרסיבי)",
+              "department": "קמעונאית",
+              "status": "בטיפול",
+              "riskLevel": 4,
+              "riskAnalysis": "סיכון ציות וסיכון מוניטין גבוה. הדבר עלול להוביל לתביעות ייצוגיות ולהתערבות של המפקח על הבנקים בנושאי הגנת הצרכן.",
+              "detailedReport": "לקוחות צורפו לכרטיסי אשראי במסגרת \"מבצעים\" טלפוניים או בסניפים מבלי שניתנה להם חשיפה נאותה לעלויות (ריבית, עמלות כרטיס) ומבלי שתועדה הסכמה מפורשת",
+              "internalRef": "REF-10",
+              "protocolStatus": "פתוח",
+              "link": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
