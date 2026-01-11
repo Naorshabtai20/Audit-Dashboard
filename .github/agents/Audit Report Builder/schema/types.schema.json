@@ -16,7 +16,7 @@
                     },
                     "icon": {
                         "type": "string",
-                        "description": "Optional icon identifier for the tab. Use this to visually distinguish tabs. Example: 'dashboard', 'analytics', or 'report'.. Use this to visually distinguish tabs. Example: 'dashboard', 'analytics', or 'report'."
+                        "description": "Optional icon identifier for the tab. Use this to visually distinguish tabs. Example: 'dashboard', 'analytics', or 'report'."
                     },
                     "subTitles": {
                         "type": "string",
