@@ -2,6 +2,7 @@
     "name": "audit-dashboard-server",
     "version": "1.0.0",
     "description": "Back-end server for Audit Dashboard",
+    "type": "module",
     "main": "index.js",
     "scripts": {
         "start": "node index.js",

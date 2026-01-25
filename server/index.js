@@ -1,22 +1,65 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const fs = require('fs');
-const path = require('path');
+import dotenv from 'dotenv';
+import express from 'express';
+import cors from 'cors';
+import bodyParser from 'body-parser';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import AWS from 'aws-sdk';
+
+dotenv.config();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // AWS S3 setup if configured
 let s3;
 let S3_BUCKET_NAME;
 if (process.env.STORAGE_TYPE === 's3')
 {
-    const AWS = require('aws-sdk');
-    AWS.config.update({
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-        region: process.env.AWS_REGION
-    });
-    s3 = new AWS.S3();
+    if (process.env.AWS_ROLE_ARN)
+    {
+        const cfg = {};
+
+        if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY)
+        {
+            cfg.accessKeyId = process.env.AWS_ACCESS_KEY_ID;
+            cfg.secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+        }
+        if (process.env.AWS_REGION)
+        {
+            cfg.region = process.env.AWS_REGION;
+        }
+        AWS.config.update(cfg);
+
+        const sts = new AWS.STS();
+        const assumeParams = {
+            RoleArn: process.env.AWS_ROLE_ARN,
+            RoleSessionName: process.env.AWS_ROLE_SESSION_NAME || 'audit-dashboard-session',
+            DurationSeconds: Number(process.env.AWS_ROLE_SESSION_DURATION) || 3600
+        };
+
+        const assumed = await sts.assumeRole(assumeParams).promise();
+        const creds = assumed.Credentials;
+        const tempCredentials = new AWS.Credentials(creds.AccessKeyId, creds.SecretAccessKey, creds.SessionToken);
+
+        s3 = new AWS.S3({ credentials: tempCredentials, region: process.env.AWS_REGION });
+        console.log('Assumed AWS role', process.env.AWS_ROLE_ARN);
+    }
+    else
+    {
+        const cfg = {};
+        if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY)
+        {
+            cfg.accessKeyId = process.env.AWS_ACCESS_KEY_ID;
+            cfg.secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+        }
+        if (process.env.AWS_REGION)
+        {
+            cfg.region = process.env.AWS_REGION;
+        }
+        AWS.config.update(cfg);
+        s3 = new AWS.S3();
+    }
+
     S3_BUCKET_NAME = process.env.S3_BUCKET_NAME;
 }
 
@@ -24,6 +67,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const DATA_DIR = path.join(__dirname, 'data');
 const STORAGE_TYPE = process.env.STORAGE_TYPE || 'file';
+const S3_PREFIX = process.env.S3_PREFIX ? process.env.S3_PREFIX.endsWith('/') ? process.env.S3_PREFIX : `${process.env.S3_PREFIX}/` : '';
 
 const ID_REGEX = /^[A-Za-z0-9_-]+$/;
 const MAX_ID_LENGTH = 64;
@@ -57,7 +101,7 @@ const saveData = async (id, data) =>
     {
         const params = {
             Bucket: S3_BUCKET_NAME,
-            Key: `${id}.json`,
+            Key: `${S3_PREFIX}${id}.json`,
             Body: JSON.stringify(data, null, 2),
             ContentType: 'application/json'
         };
@@ -77,7 +121,7 @@ const getData = async (id) =>
         {
             const params = {
                 Bucket: S3_BUCKET_NAME,
-                Key: `${id}.json`
+                Key: `${S3_PREFIX}${id}.json`
             };
             const data = await s3.getObject(params).promise();
             return JSON.parse(data.Body.toString('utf-8'));
@@ -109,7 +153,7 @@ const dataExists = async (id) =>
         {
             const params = {
                 Bucket: S3_BUCKET_NAME,
-                Key: `${id}.json`
+                Key: `${S3_PREFIX}${id}.json`
             };
             await s3.headObject(params).promise();
             return true;
@@ -134,7 +178,7 @@ const deleteData = async (id) =>
     {
         const params = {
             Bucket: S3_BUCKET_NAME,
-            Key: `${id}.json`
+            Key: `${S3_PREFIX}${id}.json`
         };
         await s3.deleteObject(params).promise();
     } else
